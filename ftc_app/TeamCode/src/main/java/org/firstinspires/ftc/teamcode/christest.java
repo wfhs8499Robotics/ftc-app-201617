@@ -2,9 +2,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "Ftc Test autonomous", group = "Autonomous OpMode")
+@Autonomous(name = "Green Track", group = "Autonomous OpMode")
 //@Override
-public class chrisauto extends LinearOpMode {
+public class christest extends LinearOpMode {
 
     public void runOpMode() throws InterruptedException {
         DcMotor leftmotor = null;
@@ -17,30 +17,44 @@ public class chrisauto extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
-        telemetry.addData(">", "Started");
+        telemetry.addData(">", "Started - going straight for 3 sec");
         telemetry.update();
         leftmotor.setPower(1.0d);
         rightmotor.setPower(1.0d);
-        sleep(2000);
-        telemetry.addData(">", "right");
+        sleep(3000);
+        telemetry.addData(">", "right 90");
         telemetry.update();
         leftmotor.setPower(1.0d);
-        rightmotor.setPower(0);
-        sleep(1000);
-        telemetry.addData(">", "short");
+        rightmotor.setPower(0d);
+        sleep(825);
+        telemetry.addData(">", "straight 3.5 sec");
+        telemetry.update();
+        leftmotor.setPower(1.0d);
+        rightmotor.setPower(1.0d);
+        sleep(3500);
+        telemetry.addData(">", "right 90");
+        telemetry.update();
+        leftmotor.setPower(1.0);
+        rightmotor.setPower(0d);
+        sleep(825);
+        telemetry.addData(">", "1 sec straight");
         telemetry.update();
         leftmotor.setPower(1.0d);
         rightmotor.setPower(1.0d);
         sleep(1000);
-        telemetry.addData(">", "left");
+        telemetry.addData(">", "right 90");
         telemetry.update();
-        leftmotor.setPower(0);
+        leftmotor.setPower(1.0);
+        rightmotor.setPower(0d);
+        sleep(825);
+        telemetry.addData(">", "1 sec straight");
+        telemetry.update();
+        leftmotor.setPower(1.0d);
         rightmotor.setPower(1.0d);
         sleep(1000);
         leftmotor.setPower(0);
         rightmotor.setPower(0);
         telemetry.addData(">", "Ended");
         telemetry.update();
-
     }
 }
