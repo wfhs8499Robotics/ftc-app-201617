@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 
-@Autonomous(name = "LightSensor Test", group = "Autonomous OpMode")
-@Disabled
+@Autonomous(name = "AutoLightSensor", group = "Autonomous OpMode")
 //@Override
-public class chrisLight extends LinearOpMode {
+public class AutoLightSensor extends LinearOpMode {
     static final double     WHITE_THRESHOLD = 0.2;  // spans between 0.1 - 0.5 from dark to light
     static final double     APPROACH_SPEED  = 0.5;
 
@@ -38,6 +36,21 @@ public class chrisLight extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+        telemetry.addData(">", "Started - going straight for 3 sec");
+        telemetry.update();
+        leftmotor.setPower(1.0d);
+        rightmotor.setPower(1.0d);
+        sleep(3000);
+        telemetry.addData(">", "right 90");
+        telemetry.update();
+        leftmotor.setPower(1.0d);
+        rightmotor.setPower(0d);
+        sleep(825);
+        telemetry.addData(">", "straight 1.5 sec");
+        telemetry.update();
+        leftmotor.setPower(1.0d);
+        rightmotor.setPower(1.0d);
+        sleep(1500);
         // turn on LED of light sensor.
         lightSensor.enableLed(true);
 
