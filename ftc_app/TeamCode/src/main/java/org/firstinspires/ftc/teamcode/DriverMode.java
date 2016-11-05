@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class DriverMode extends OpMode {
     DcMotor leftmotor = null;
     DcMotor rightmotor = null;
+    float StickPercent = 0.5f;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -27,6 +28,7 @@ public class DriverMode extends OpMode {
         leftmotor = hardwareMap.dcMotor.get("left motor");
         leftmotor.setDirection(DcMotor.Direction.REVERSE);
         rightmotor = hardwareMap.dcMotor.get("right motor");
+
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
@@ -54,15 +56,27 @@ public class DriverMode extends OpMode {
     public void loop() {
         double left;
         double right;
+        float hypermode;
+        float seanmode;
+        float driveadjustment;
 
         // Run wheels in tank mode (note: The joystick goes negative when pushed forwards, so negate it)
         left = -gamepad1.left_stick_y;
         right = -gamepad1.right_stick_y;
-        leftmotor.setPower(left);
-        rightmotor.setPower(right);
+        hypermode = gamepad1.right_trigger;
+        seanmode = gamepad1.left_trigger;
+        driveadjustment = StickPercent;
+        if (hypermode > 0){
+            driveadjustment = StickPercent * 2.0f;
+        }
+        if (seanmode > 0){
+            driveadjustment = StickPercent * 0.5f;
+        }
+        leftmotor.setPower(left * driveadjustment);
+        rightmotor.setPower(right * driveadjustment);
 
-        telemetry.addData("left",  "%.2f", left);
-        telemetry.addData("right", "%.2f", right);
+        telemetry.addData("left",  "%.2f", left * driveadjustment);
+        telemetry.addData("right", "%.2f", right * driveadjustment);
         updateTelemetry(telemetry);
     }
 
