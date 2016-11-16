@@ -23,9 +23,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "AutoVuforia", group = "Autonomous OpMode")
+@Autonomous(name = "ChrisVuforiaTest", group = "Autonomous OpMode")
 //@Override
-public class AutoVuforia extends LinearOpMode {
+public class ChrisVuforiaTest extends LinearOpMode {
     public static final String TAG = "Vuforia Sample";
     OpenGLMatrix lastLocation = null;
 
@@ -87,18 +87,9 @@ public class AutoVuforia extends LinearOpMode {
          * example "FTCImages", datasets can be found in in this project in the
          * documentation directory.
          */
-        VuforiaTrackables FTCImages = this.vuforia.loadTrackablesFromAsset("FTC_2016-17");
-        VuforiaTrackable blueMiddle = FTCImages.get(0);
-        blueMiddle.setName("BlueMiddle");  // wheels
-
-        VuforiaTrackable redCorner = FTCImages.get(1);
-        redCorner.setName("RedCorner");  // tools
-
-        VuforiaTrackable blueCorner = FTCImages.get(2);
-        blueCorner.setName("BlueCorner");  // legos
-
-        VuforiaTrackable redMiddle = FTCImages.get(3);
-        redMiddle.setName("RedMiddle");  // Gears
+        VuforiaTrackables FTCImages = this.vuforia.loadTrackablesFromAsset("RedBall");
+        VuforiaTrackable RedBall = FTCImages.get(0);
+        RedBall.setName("RedBall");  // wheels
 
         /** For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
@@ -179,51 +170,8 @@ public class AutoVuforia extends LinearOpMode {
                         /* First, in the fixed (field) coordinate system, we rotate 90deg in X, then 90 in Z */
                         AxesReference.EXTRINSIC, AxesOrder.XZX,
                         AngleUnit.DEGREES, 90, 90, 0));
-        blueMiddle.setLocation(blueMiddleLocationOnField);
+        RedBall.setLocation(blueMiddleLocationOnField);
         RobotLog.ii(TAG, "Blue Middle=%s", format(blueMiddleLocationOnField));
-
-       /*
-        * To place the Stones Target on the Blue Audience wall:
-        * - First we rotate it 90 around the field's X axis to flip it upright
-        * - Finally, we translate it along the Y axis towards the blue audience wall.
-        */
-        OpenGLMatrix blueCornerLocationOnField = OpenGLMatrix
-                /* Then we translate the target off to the Blue Audience wall.
-                Our translation here is a positive translation in Y.*/
-                .translation(0, mmFTCFieldWidth / 2, 0)
-                .multiplied(Orientation.getRotationMatrix(
-                        /* First, in the fixed (field) coordinate system, we rotate 90deg in X */
-                        AxesReference.EXTRINSIC, AxesOrder.XZX,
-                        AngleUnit.DEGREES, 90, 0, 0));
-        blueCorner.setLocation(blueCornerLocationOnField);
-        RobotLog.ii(TAG, "Blue Target=%s", format(blueCornerLocationOnField));
-
-        OpenGLMatrix redMiddleLocationOnField = OpenGLMatrix
-                /* Then we translate the target off to the RED WALL. Our translation here
-                is a negative translation in X.*/
-                .translation(-mmFTCFieldWidth / 2, 0, 0)
-                .multiplied(Orientation.getRotationMatrix(
-                        /* First, in the fixed (field) coordinate system, we rotate 90deg in X, then 90 in Z */
-                        AxesReference.EXTRINSIC, AxesOrder.XZX,
-                        AngleUnit.DEGREES, 90, 90, 0));
-        redMiddle.setLocation(redMiddleLocationOnField);
-        RobotLog.ii(TAG, "Red Target=%s", format(redMiddleLocationOnField));
-
-       /*
-        * To place the Stones Target on the Blue Audience wall:
-        * - First we rotate it 90 around the field's X axis to flip it upright
-        * - Finally, we translate it along the Y axis towards the blue audience wall.
-        */
-        OpenGLMatrix redCornerLocationOnField = OpenGLMatrix
-                /* Then we translate the target off to the Blue Audience wall.
-                Our translation here is a positive translation in Y.*/
-                .translation(0, mmFTCFieldWidth / 2, 0)
-                .multiplied(Orientation.getRotationMatrix(
-                        /* First, in the fixed (field) coordinate system, we rotate 90deg in X */
-                        AxesReference.EXTRINSIC, AxesOrder.XZX,
-                        AngleUnit.DEGREES, 90, 0, 0));
-        redCorner.setLocation(redCornerLocationOnField);
-        RobotLog.ii(TAG, "Blue Target=%s", format(redCornerLocationOnField));
 
 
         /**
@@ -250,10 +198,7 @@ public class AutoVuforia extends LinearOpMode {
          * listener is a {@link VuforiaTrackableDefaultListener} and can so safely cast because
          * we have not ourselves installed a listener of a different type.
          */
-        ((VuforiaTrackableDefaultListener) redCorner.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener) blueCorner.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener) redMiddle.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener) blueMiddle.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
+        ((VuforiaTrackableDefaultListener) RedBall.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
 
         /**
          * A brief tutorial: here's how all the math is going to work:
