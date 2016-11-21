@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.RobotLog;
+import com.vuforia.HINT;
+import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
@@ -28,6 +30,7 @@ import java.util.List;
 public class AutoVuforia extends LinearOpMode {
     public static final String TAG = "Vuforia Sample";
     OpenGLMatrix lastLocation = null;
+    int i;
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -78,6 +81,8 @@ public class AutoVuforia extends LinearOpMode {
         parameters.vuforiaLicenseKey = "Adzda7//////AAAAGUpLKy6pMUL/jHraDyelv1GA1V8dkeOGLZerg9xBjHAW7cFALsf5Y+T8b6ncYMV+CBje6cvECbbmiEejmvrqDxC0W38xIZN9vyMNGne7E+GXMwVf5gJlg4XTmI38GZ2S4d8y2/qqglzoMDElNJJA7Az97KS84DI+6odaFViAUnvfc4dX5aSX4h0KmBqRUH9761EGNsnz2IQz5/tYAAs9hsMDsBk/fSadAT9NZoc/4l5iJKwlVhKk7avboqJcQx0yzVIUwyjwdCco4SMX+EhSkDuOyaUUK8odF2DOWmsA+x491hpM1qnrGX6XlAJ5npFNQO+pH5D5vNn2HtcUm/a882RCJ0Vu6BasSJrdgJugiway";
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
+
 
         /**
          * Load the data sets that for the trackable objects we wish to track. These particular data
@@ -280,6 +285,11 @@ public class AutoVuforia extends LinearOpMode {
         telemetry.addData(">", "Finished initiating, press play to start moving");
         telemetry.addData(">", "Vuforia ready");
         telemetry.update();
+
+        for(i=0, i>3, i++){
+            VuforiaTrackable beac = FTCImages(i);
+            //TODO print out the locations of the beacons so we know which side we are on and can pick the center image to go to.
+        }
 
         waitForStart();
 
