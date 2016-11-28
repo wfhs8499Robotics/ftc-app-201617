@@ -13,6 +13,7 @@ import com.vuforia.Vuforia;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -286,17 +287,83 @@ public class AutoVuforia extends LinearOpMode {
         telemetry.addData(">", "Vuforia ready");
         telemetry.update();
 
-        for(i=0, i>3, i++){
+/*        for(i=0, i>3, i++){
             VuforiaTrackable beac = FTCImages(i);
             //TODO print out the locations of the beacons so we know which side we are on and can pick the center image to go to.
         }
-
+*/
         waitForStart();
 
         /** Start tracking the data sets we care about. */
+
+        VuforiaTrackableDefaultListener wheels = (VuforiaTrackableDefaultListener) FTCImages.get(0).getListener();
+
         FTCImages.activate();
 
-        while (opModeIsActive()) {
+        leftmotor.setPower(1.0);
+        rightmotor.setPower(1.0);
+
+        while (opModeIsActive() && FTCImages.getRawPose() ==null) {
+            idle();
+        }
+
+        leftmotor.setPower(0);
+        rightmotor.setPower(0);
+
+        VectorF angles = anglesFromTarget(wheels);
+
+        VectorF trans = navOffWall(FTCImages.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
+
+        if(trans.get(0) > 0) {
+            leftmotor.setPower(0.2);
+            rightmotor.setPower(-0.2);
+        } else {
+            leftmotor.setPower(-0.2);
+            rightmotor.setPower(-0.2);
+        }
+
+        do {
+            if (FTCImages.getPose() != null) {
+                trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
+
+            }
+            idle();
+        } while (opModeIsActive() && Math.abs(trans.get(0)) > 30);
+
+        leftmotor.setPower(0);
+        rightmotor.setPower(0);
+
+
+        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 409.575 *560))));
+        rightmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 409.575 *560))));
+
+        leftmotor.setPower(0.3);
+        rightmotor.setPower(0.3);
+
+        while(opModeIsActive() && leftmotor.isBusy() && rightmotor.isBusy()){
+            idle();
+        }
+
+        leftmotor.setPower(0);
+        rightmotor.setPower(0);
+
+        while (opModeIsActive() && (wheels.getPose() == null || Math.abs(wheels.getPose().getTranslation().get(0) > 10))){
+            if(wheels.getPose() != null) {
+                if (wheels.getPose().getTranslation().get(0) > 0) {
+                    leftmotor.setPower(-0.3);
+                    rightmotor.setPower(0.3);
+                } else {
+                    leftmotor.setPower(0.3);
+                    rightmotor.setPower(-0.3);
+                }
+            } else {
+                leftmotor.setPower(-0.3);
+                rightmotor.setPower(0.3);
+                }
+            }
+
+        leftmotor.setPower(0);
+        rightmotor.setPower(0);
 
             for (VuforiaTrackable trackable : allTrackables) {
                 /**
@@ -330,6 +397,19 @@ public class AutoVuforia extends LinearOpMode {
      */
     String format(OpenGLMatrix transformationMatrix) {
         return transformationMatrix.formatAsTransform();
+    }
+
+    public VectorF navOffWall(VectorF trans, double robotAngle, VectorF offWall){
+        return new VectorF((float) (trans.get(0) - offWall.get(0) * Math.sin(Math.toRadians(robotAngle)) - offWall.get(2) * Math.cos(Math.toRadians(robotAngle))), trans.get(1), (float) (trans.get(2) + offWall.get(0) * Math.cos(Math.toRadians(robotAngle)) - offWall.get(2) * Math.sin(Math.toRadians(robotAngle))));
+    }
+
+    public VectorF anglesFromTarget(VuforiaTrackableDefaultListener image){
+        float [] data = image.getRawPose().getData();
+        float [] [] rotation = {{data[0], data[1]}, {data[4], data[5], data[6]}, {data[8], data[9], data[10]}};
+        double thetaX = Math.atan2(rotation[2][1], rotation[2][2]);
+        double thetaY = Math.atan2(-rotation[2][0], Math.sqrt(rotation[2][1] * rotation[2][1] + rotation[2][2] * rotation[2][2]));
+        double thetaZ = Math.atan2(rotation[1][0], rotation[0][0]);
+        return new VectorF((float)thetaX, (float)thetaY, (float)thetaZ);
     }
 }
 
