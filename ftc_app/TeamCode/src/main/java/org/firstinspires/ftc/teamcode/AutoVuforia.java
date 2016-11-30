@@ -303,7 +303,7 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setPower(1.0);
         rightmotor.setPower(1.0);
 
-        while (opModeIsActive() && FTCImages.getRawPose() ==null) {
+        while (opModeIsActive() && wheels.getRawPose() ==null) {
             idle();
         }
 
@@ -312,7 +312,7 @@ public class AutoVuforia extends LinearOpMode {
 
         VectorF angles = anglesFromTarget(wheels);
 
-        VectorF trans = navOffWall(FTCImages.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
+        VectorF trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
 
         if(trans.get(0) > 0) {
             leftmotor.setPower(0.2);
@@ -323,9 +323,8 @@ public class AutoVuforia extends LinearOpMode {
         }
 
         do {
-            if (FTCImages.getPose() != null) {
+            if (wheels.getPose() != null) {
                 trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
-
             }
             idle();
         } while (opModeIsActive() && Math.abs(trans.get(0)) > 30);
@@ -347,7 +346,7 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setPower(0);
         rightmotor.setPower(0);
 
-        while (opModeIsActive() && (wheels.getPose() == null || Math.abs(wheels.getPose().getTranslation().get(0) > 10))){
+        while (opModeIsActive() && (wheels.getPose() == null || Math.abs(wheels.getPose().getTranslation().get(0)) > 10)){
             if(wheels.getPose() != null) {
                 if (wheels.getPose().getTranslation().get(0) > 0) {
                     leftmotor.setPower(-0.3);
@@ -365,18 +364,17 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setPower(0);
         rightmotor.setPower(0);
 
-            for (VuforiaTrackable trackable : allTrackables) {
-                /**
-                 * getUpdatedRobotLocation() will return null if no new information is available since
-                 * the last time that call was made, or if the trackable is not currently visible.
-                 * getRobotLocation() will return null if the trackable is not currently visible.
-                 */
-                telemetry.addData(trackable.getName(), ((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible() ? "Visible" : "Not Visible");    //
+        for (VuforiaTrackable trackable : allTrackables) {
+            /**
+             * getUpdatedRobotLocation() will return null if no new information is available since
+             * the last time that call was made, or if the trackable is not currently visible.
+             * getRobotLocation() will return null if the trackable is not currently visible.
+             */
+            telemetry.addData(trackable.getName(), ((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible() ? "Visible" : "Not Visible");    //
 
-                OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-                if (robotLocationTransform != null) {
-                    lastLocation = robotLocationTransform;
-                }
+            OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+            if (robotLocationTransform != null) {
+                lastLocation = robotLocationTransform;
             }
             /**
              * Provide feedback as to where the robot was last located (if we know).
@@ -391,25 +389,25 @@ public class AutoVuforia extends LinearOpMode {
             idle();
         }
     }
-    /**
-     * A simple utility that extracts positioning information from a transformation matrix
-     * and formats it in a form palatable to a human being.
-     */
-    String format(OpenGLMatrix transformationMatrix) {
-        return transformationMatrix.formatAsTransform();
-    }
+/**
+ * A simple utility that extracts positioning information from a transformation matrix
+ * and formats it in a form palatable to a human being.
+ */
+String format(OpenGLMatrix transformationMatrix) {
+    return transformationMatrix.formatAsTransform();
+}
 
-    public VectorF navOffWall(VectorF trans, double robotAngle, VectorF offWall){
-        return new VectorF((float) (trans.get(0) - offWall.get(0) * Math.sin(Math.toRadians(robotAngle)) - offWall.get(2) * Math.cos(Math.toRadians(robotAngle))), trans.get(1), (float) (trans.get(2) + offWall.get(0) * Math.cos(Math.toRadians(robotAngle)) - offWall.get(2) * Math.sin(Math.toRadians(robotAngle))));
-    }
+public VectorF navOffWall(VectorF trans, double robotAngle, VectorF offWall){
+    return new VectorF((float) (trans.get(0) - offWall.get(0) * Math.sin(Math.toRadians(robotAngle)) - offWall.get(2) * Math.cos(Math.toRadians(robotAngle))), trans.get(1), (float) (trans.get(2) + offWall.get(0) * Math.cos(Math.toRadians(robotAngle)) - offWall.get(2) * Math.sin(Math.toRadians(robotAngle))));
+}
 
-    public VectorF anglesFromTarget(VuforiaTrackableDefaultListener image){
-        float [] data = image.getRawPose().getData();
-        float [] [] rotation = {{data[0], data[1]}, {data[4], data[5], data[6]}, {data[8], data[9], data[10]}};
-        double thetaX = Math.atan2(rotation[2][1], rotation[2][2]);
-        double thetaY = Math.atan2(-rotation[2][0], Math.sqrt(rotation[2][1] * rotation[2][1] + rotation[2][2] * rotation[2][2]));
-        double thetaZ = Math.atan2(rotation[1][0], rotation[0][0]);
-        return new VectorF((float)thetaX, (float)thetaY, (float)thetaZ);
-    }
+public VectorF anglesFromTarget(VuforiaTrackableDefaultListener image){
+    float [] data = image.getRawPose().getData();
+    float [] [] rotation = {{data[0], data[1]}, {data[4], data[5], data[6]}, {data[8], data[9], data[10]}};
+    double thetaX = Math.atan2(rotation[2][1], rotation[2][2]);
+    double thetaY = Math.atan2(-rotation[2][0], Math.sqrt(rotation[2][1] * rotation[2][1] + rotation[2][2] * rotation[2][2]));
+    double thetaZ = Math.atan2(rotation[1][0], rotation[0][0]);
+    return new VectorF((float)thetaX, (float)thetaY, (float)thetaZ);
+}
 }
 
