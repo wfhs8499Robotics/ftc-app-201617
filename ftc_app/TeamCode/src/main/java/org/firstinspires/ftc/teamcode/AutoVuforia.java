@@ -303,7 +303,7 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setPower(1.0);
         rightmotor.setPower(1.0);
 
-        while (opModeIsActive() && wheels.getRawPose() ==null) {
+        while (opModeIsActive() && wheels.getRawPose() == null) {
             idle();
         }
 
@@ -314,12 +314,20 @@ public class AutoVuforia extends LinearOpMode {
 
         VectorF trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
 
+        sleep(1000);
+
+        telemetry.addData("X = ", trans.get(0));
+        telemetry.addData("angles - ", angles.get(0));
+        telemetry.update();
+
+        sleep(1000);
+
         if(trans.get(0) > 0) {
-            leftmotor.setPower(0.2);
-            rightmotor.setPower(-0.2);
+            leftmotor.setPower(0.05);
+            rightmotor.setPower(-0.05);
         } else {
-            leftmotor.setPower(-0.2);
-            rightmotor.setPower(-0.2);
+            leftmotor.setPower(-0.05);
+            rightmotor.setPower(0.05);
         }
 
         do {
@@ -327,21 +335,21 @@ public class AutoVuforia extends LinearOpMode {
                 trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
             }
             idle();
-        } while (opModeIsActive() && Math.abs(trans.get(0)) > 30);
+        } while (opModeIsActive() && Math.abs(trans.get(0)) > 0);
 
         leftmotor.setPower(0);
         rightmotor.setPower(0);
 
 
-        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 409.575 *560))));
-        rightmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 409.575 *560))));
+ //  encoders     leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 409.575 *560))));
+ //  encoders     rightmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 409.575 *560))));
 
         leftmotor.setPower(0.3);
         rightmotor.setPower(0.3);
 
-        while(opModeIsActive() && leftmotor.isBusy() && rightmotor.isBusy()){
-            idle();
-        }
+ //  encoders     while(opModeIsActive() && leftmotor.isBusy() && rightmotor.isBusy()){
+ //           idle();
+ //  encoders     }
 
         leftmotor.setPower(0);
         rightmotor.setPower(0);
