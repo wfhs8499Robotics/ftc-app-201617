@@ -300,6 +300,9 @@ public class AutoVuforia extends LinearOpMode {
 
         FTCImages.activate();
 
+        leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         leftmotor.setPower(1.0);
         rightmotor.setPower(1.0);
 
@@ -310,17 +313,12 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setPower(0);
         rightmotor.setPower(0);
 
-        VectorF angles = anglesFromTarget(wheels);
-
-        VectorF trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
-
-        sleep(1000);
-
-        telemetry.addData("X = ", trans.get(0));
-        telemetry.addData("angles - ", angles.get(0));
+        telemetry.addData("running - after sees image", null);
         telemetry.update();
 
-        sleep(1000);
+        VectorF angles = anglesFromTarget(wheels);
+
+        VectorF trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
 
         if(trans.get(0) > 0) {
             leftmotor.setPower(0.05);
@@ -330,47 +328,82 @@ public class AutoVuforia extends LinearOpMode {
             rightmotor.setPower(0.05);
         }
 
+        telemetry.addData("running - first alignment", null);
+        telemetry.update();
+
+
         do {
             if (wheels.getPose() != null) {
-                trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(500, 0, 0));
+                trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
             }
             idle();
-        } while (opModeIsActive() && Math.abs(trans.get(0)) > 0);
+        } while (opModeIsActive() && Math.abs(trans.get(0)) > 30);
 
         leftmotor.setPower(0);
         rightmotor.setPower(0);
 
+        telemetry.addData("running - move infront of image", null);
+        telemetry.update();
 
- //  encoders     leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 409.575 *560))));
- //  encoders     rightmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 409.575 *560))));
+        leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        leftmotor.setPower(0.3);
-        rightmotor.setPower(0.3);
+        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *360))));
+        rightmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *360))));
 
- //  encoders     while(opModeIsActive() && leftmotor.isBusy() && rightmotor.isBusy()){
- //           idle();
- //  encoders     }
+        leftmotor.setPower(0.15);
+        rightmotor.setPower(0.15);
+
+        while(opModeIsActive() && leftmotor.isBusy() && rightmotor.isBusy()){
+          idle();
+        }
 
         leftmotor.setPower(0);
         rightmotor.setPower(0);
+
+        telemetry.addData("running - after positioning", null);
+        telemetry.update();
+
+        leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         while (opModeIsActive() && (wheels.getPose() == null || Math.abs(wheels.getPose().getTranslation().get(0)) > 10)){
             if(wheels.getPose() != null) {
                 if (wheels.getPose().getTranslation().get(0) > 0) {
-                    leftmotor.setPower(-0.3);
-                    rightmotor.setPower(0.3);
+                    leftmotor.setPower(0.03);
+                    rightmotor.setPower(-0.03);
                 } else {
-                    leftmotor.setPower(0.3);
-                    rightmotor.setPower(-0.3);
+                    leftmotor.setPower(-0.03);
+                    rightmotor.setPower(0.03);
                 }
             } else {
-                leftmotor.setPower(-0.3);
-                rightmotor.setPower(0.3);
+                leftmotor.setPower(-0.15);
+                rightmotor.setPower(0.15);
                 }
-            }
+        }
 
         leftmotor.setPower(0);
         rightmotor.setPower(0);
+        telemetry.addData("running - after repositioning", null);
+        telemetry.update();
+
+        leftmotor.setPower(0.15);
+        rightmotor.setPower(0.15);
+        while (opModeIsActive() && (!lefttouchSensor.isPressed() || !righttouchSensor.isPressed())) {
+             idle();
+        }
+        leftmotor.setPower(0);
+        rightmotor.setPower(0);
+
+
+        telemetry.addData("stopping", null);
+        telemetry.update();
+
+        leftmotor.setPower(0);
+        rightmotor.setPower(0);
+        telemetry.addData("running - on the wall", null);
+        telemetry.update();
+
 
         for (VuforiaTrackable trackable : allTrackables) {
             /**
