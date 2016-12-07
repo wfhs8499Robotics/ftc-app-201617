@@ -22,9 +22,11 @@ public class DriverMode extends OpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
-    static final double MAX_POS     =  1.0;     // Maximum rotational position
-    static final double MIN_POS     =  0.0;     // Minimum rotational position
-    
+    static final double MAX_POS     =  0.4;     // Maximum rotational position
+    static final double MIN_POS     =  0.1;     // Minimum rotational position
+    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -37,6 +39,8 @@ public class DriverMode extends OpMode {
         leftmotor.setDirection(DcMotor.Direction.REVERSE);
         rightmotor = hardwareMap.dcMotor.get("right motor");
         servo = hardwareMap.servo.get("button pusher");
+
+        servo.setPosition(position);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
@@ -67,12 +71,25 @@ public class DriverMode extends OpMode {
         float hypermode;
         float seanmode;
         float driveadjustment;
+        float pushbeaconright;
+        float pushbeaconleft;
+
 
         // Run wheels in tank mode (note: The joystick goes negative when pushed forwards, so negate it)
         left = -gamepad1.left_stick_y;
         right = -gamepad1.right_stick_y;
         hypermode = gamepad1.right_trigger;
         seanmode = gamepad1.left_trigger;
+        pushbeaconright = gamepad2.right_trigger;
+        pushbeaconleft = gamepad2.left_trigger;
+
+        if (pushbeaconright > 0){
+            servo.setPosition(MAX_POS);
+        }
+        if (pushbeaconleft > 0){
+            servo.setPosition(MIN_POS);
+        }
+
         driveadjustment = StickPercent;
         if (hypermode > 0){
             driveadjustment = StickPercent * 2.0f;

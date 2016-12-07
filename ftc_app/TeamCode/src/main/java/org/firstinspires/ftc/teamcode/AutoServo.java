@@ -15,8 +15,8 @@ public class AutoServo extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
-    static final double MAX_POS     =  1.0;     // Maximum rotational position
-    static final double MIN_POS     =  0.0;     // Minimum rotational position
+    static final double MAX_POS     =  0.40;     // Maximum rotational position
+    static final double MIN_POS     =  0.10;     // Minimum rotational position
 
     // Define class members
     Servo servo;
@@ -28,6 +28,8 @@ public class AutoServo extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // Change the text in quotes to match any servo name on your robot.
         servo = hardwareMap.servo.get("button pusher");
+
+        servo.setPosition(position);
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
