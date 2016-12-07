@@ -1,5 +1,6 @@
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -16,7 +17,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class DriverMode extends OpMode {
     DcMotor leftmotor = null;
     DcMotor rightmotor = null;
+    Servo servo = null;
     float StickPercent = 0.5f;
+
+    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
+    static final int    CYCLE_MS    =   50;     // period of each cycle
+    static final double MAX_POS     =  1.0;     // Maximum rotational position
+    static final double MIN_POS     =  0.0;     // Minimum rotational position
+    
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -28,7 +36,7 @@ public class DriverMode extends OpMode {
         leftmotor = hardwareMap.dcMotor.get("left motor");
         leftmotor.setDirection(DcMotor.Direction.REVERSE);
         rightmotor = hardwareMap.dcMotor.get("right motor");
-
+        servo = hardwareMap.servo.get("button pusher");
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //

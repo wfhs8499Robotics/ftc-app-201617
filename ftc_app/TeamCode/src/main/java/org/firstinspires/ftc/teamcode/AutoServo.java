@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Created by Mike on 12/6/2016.
  */
-@Autonomous(name = "AutoServo", group = "Autonomous")
+@Autonomous(name = "AutoServo", group = "Autonomous OpMode")
 
 public class AutoServo extends LinearOpMode {
 

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 
 @Autonomous(name = "AutoLightSensor", group = "Autonomous OpMode")
+@Disabled
 //@Override
 public class AutoLightSensor extends LinearOpMode {
     static final double     WHITE_THRESHOLD = 0.55;  // spans between 0.1 - 0.5 from dark to light
