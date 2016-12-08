@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -50,10 +54,26 @@ public class AutoVuforia extends LinearOpMode {
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
     static final double     TURN_SPEED              = 0.5;
-    DcMotor leftmotor = null;
-    DcMotor rightmotor = null;
-    TouchSensor lefttouchSensor;  // Hardware Device Object
-    TouchSensor righttouchSensor;  // Hardware Device Object
+
+    DcMotor leftmotor = null; // Hardware Device Object
+    DcMotor rightmotor = null; // Hardware Device Object
+    TouchSensor lefttouchSensor = null;  // Hardware Device Object
+    TouchSensor righttouchSensor = null;  // Hardware Device Object
+    ColorSensor colorSensor = null;    // Hardware Device Object
+
+    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
+    static final int    CYCLE_MS    =   50;     // period of each cycle
+    static final double MAX_POS     =  0.40;     // Maximum rotational position
+    static final double MIN_POS     =  0.10;     // Minimum rotational position
+
+    // Define class members
+
+    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    boolean rampUp = true;
+
+    Servo servo = null; // Hardware Device Object
+
+
 
     public void runOpMode() throws InterruptedException {
         leftmotor = hardwareMap.dcMotor.get("left motor");
@@ -61,7 +81,18 @@ public class AutoVuforia extends LinearOpMode {
         rightmotor = hardwareMap.dcMotor.get("right motor");
         lefttouchSensor = hardwareMap.touchSensor.get("left touch sensor");
         righttouchSensor = hardwareMap.touchSensor.get("right touch sensor");
+        servo = hardwareMap.servo.get("button pusher");
+
+        servo.setPosition(position);
+
+
         int counter = 0;
+
+        // hsvValues is an array that will hold the hue, saturation, and value information.
+        float hsvValues[] = {0F,0F,0F};
+
+        // values is a reference to the hsvValues array.
+        final float values[] = hsvValues;
 
         /**
          * Start up Vuforia, telling it the id of the view that we wish to use as the parent for
@@ -299,6 +330,14 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        boolean bLedOn = true;
+
+        // get a reference to our ColorSensor object.
+        colorSensor = hardwareMap.colorSensor.get("color sensor");
+
+        // Set the LED in the beginning
+        colorSensor.enableLed(bLedOn);
+
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0",  "Starting at %7d :%7d",
                 leftmotor.getCurrentPosition(),
@@ -425,6 +464,23 @@ public class AutoVuforia extends LinearOpMode {
         rightmotor.setPower(0);
         telemetry.addData("running - on the wall", null);
         telemetry.update();
+
+        // convert the RGB values to HSV values.
+        Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
+
+        // send the info back to driver station using telemetry function.
+        telemetry.addData("LED", bLedOn ? "On" : "Off");
+        telemetry.addData("Clear", colorSensor.alpha());
+        telemetry.addData("Red  ", colorSensor.red());
+        telemetry.addData("Green", colorSensor.green());
+        telemetry.addData("Blue ", colorSensor.blue());
+        telemetry.addData("Hue", hsvValues[0]);
+        telemetry.addData("Saturation", hsvValues[1]);
+        telemetry.addData("Value", hsvValues[2]);
+
+        // Set the servo to the new position and pause;
+        servo.setPosition(MAX_POS);
+        sleep(CYCLE_MS); // allow the servo to move
 
 
         for (VuforiaTrackable trackable : allTrackables) {
