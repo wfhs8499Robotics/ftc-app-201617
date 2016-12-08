@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
@@ -29,6 +30,8 @@ import java.util.List;
 @Autonomous(name = "AutoVuforia", group = "Autonomous OpMode")
 //@Override
 public class AutoVuforia extends LinearOpMode {
+    /* Declare OpMode members. */
+
     public static final String TAG = "Vuforia Sample";
     OpenGLMatrix lastLocation = null;
     int i;
@@ -39,18 +42,23 @@ public class AutoVuforia extends LinearOpMode {
      */
     VuforiaLocalizer vuforia;
 
-    public void runOpMode() throws InterruptedException {
-        DcMotor leftmotor = null;
-        DcMotor rightmotor = null;
-        LightSensor lightSensor;      // Primary LEGO Light sensor,
-        TouchSensor lefttouchSensor;  // Hardware Device Object
-        TouchSensor righttouchSensor;  // Hardware Device Object
+    private ElapsedTime runtime = new ElapsedTime();
 
+    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     DRIVE_SPEED             = 0.6;
+    static final double     TURN_SPEED              = 0.5;
+    DcMotor leftmotor = null;
+    DcMotor rightmotor = null;
+    TouchSensor lefttouchSensor;  // Hardware Device Object
+    TouchSensor righttouchSensor;  // Hardware Device Object
+
+    public void runOpMode() throws InterruptedException {
         leftmotor = hardwareMap.dcMotor.get("left motor");
         leftmotor.setDirection(DcMotor.Direction.REVERSE);
         rightmotor = hardwareMap.dcMotor.get("right motor");
-        // get a reference to our Light Sensor object.
-        lightSensor = hardwareMap.lightSensor.get("light sensor");                // Primary LEGO Light Sensor
         lefttouchSensor = hardwareMap.touchSensor.get("left touch sensor");
         righttouchSensor = hardwareMap.touchSensor.get("right touch sensor");
         int counter = 0;
@@ -280,9 +288,23 @@ public class AutoVuforia extends LinearOpMode {
          * @see VuforiaTrackableDefaultListener#getRobotLocation()
          */
 
-        /** Wait for the game to begin */
-        telemetry.addData(">", "Press Play to start tracking");
+        // Send telemetry message to signify robot waiting;
+        telemetry.addData("Status", "Resetting Encoders");    //
         telemetry.update();
+
+        leftmotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightmotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        idle();
+
+        leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Send telemetry message to indicate successful Encoder reset
+        telemetry.addData("Path0",  "Starting at %7d :%7d",
+                leftmotor.getCurrentPosition(),
+                rightmotor.getCurrentPosition());
+
+        /** Wait for the game to begin */
         telemetry.addData(">", "Finished initiating, press play to start moving");
         telemetry.addData(">", "Vuforia ready");
         telemetry.update();
@@ -348,8 +370,8 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *360))));
-        rightmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *360))));
+        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *1440))));
+        rightmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *1440))));
 
         leftmotor.setPower(0.15);
         rightmotor.setPower(0.15);
@@ -450,5 +472,71 @@ public VectorF anglesFromTarget(VuforiaTrackableDefaultListener image){
     double thetaZ = Math.atan2(rotation[1][0], rotation[0][0]);
     return new VectorF((float)thetaX, (float)thetaY, (float)thetaZ);
 }
+
+/*
+ *  Method to perform a relative move, based on encoder counts.
+ *  Encoders are not reset as the move is based on the current position.
+ *  Move will stop if any of three conditions occur:
+ *  1) Move gets to the desired position
+ *  2) Move runs out of time
+ *  3) Driver stops the opmode running.
+ *
+ *  Note: Reverse movement is obtained by setting a negative distance (not speed)
+ *      encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 48 Inches with 5 Sec timeout
+ *      encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+ *      encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+ *
+ */
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS) throws InterruptedException {
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = leftmotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightTarget = rightmotor.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            leftmotor.setTargetPosition(newLeftTarget);
+            rightmotor.setTargetPosition(newRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            leftmotor.setPower(Math.abs(speed));
+            rightmotor.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (leftmotor.isBusy() && rightmotor.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d",
+                        leftmotor.getCurrentPosition(),
+                        rightmotor.getCurrentPosition());
+                telemetry.update();
+
+                // Allow time for other processes to run.
+                idle();
+            }
+
+            // Stop all motion;
+            leftmotor.setPower(0);
+            rightmotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+        }
+    }
 }
 
