@@ -70,10 +70,15 @@ public class AutoVuforia extends LinearOpMode {
 
     double  position = ((MAX_POS - MIN_POS) / 2) + MIN_POS; // Start at halfway position
     boolean rampUp = true;
-
+    boolean bBlueSide = false;
+    boolean bRedSide = false;
     Servo servo = null; // Hardware Device Object
-
-
+    // hsvValues is an array that will hold the hue, saturation, and value information.
+    float hsvValues[] = {0F,0F,0F};
+    // values is a reference to the hsvValues array.
+    final float values[] = hsvValues;
+    // variable to turn on and off the LED on the Color sensor
+    boolean bLedOn = false;
 
     public void runOpMode() throws InterruptedException {
         leftmotor = hardwareMap.dcMotor.get("left motor");
@@ -82,18 +87,8 @@ public class AutoVuforia extends LinearOpMode {
 //        lefttouchSensor = hardwareMap.touchSensor.get("left touch sensor");
 //        righttouchSensor = hardwareMap.touchSensor.get("right touch sensor");
         servo = hardwareMap.servo.get("button pusher");
-
         servo.setPosition(position);
-
-
         int counter = 0;
-
-        // hsvValues is an array that will hold the hue, saturation, and value information.
-        float hsvValues[] = {0F,0F,0F};
-
-        // values is a reference to the hsvValues array.
-        final float values[] = hsvValues;
-
         /**
          * Start up Vuforia, telling it the id of the view that we wish to use as the parent for
          * the camera monitor feedback; if no camera monitor feedback is desired, use the parameterless
@@ -148,177 +143,11 @@ public class AutoVuforia extends LinearOpMode {
         /** For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
         allTrackables.addAll(FTCImages);
-
-        /**
-         * We use units of mm here because that's the recommended units of measurement for the
-         * size values specified in the XML for the ImageTarget trackables in data sets. E.g.:
-         *      <ImageTarget name="stones" size="247 173"/>
-         * You don't *have to* use mm here, but the units here and the units used in the XML
-         * target configuration files *must* correspond for the math to work out correctly.
-         */
-        float mmPerInch = 25.4f;
-        float mmBotWidth = 18 * mmPerInch;            // ... or whatever is right for your robot
-        float mmFTCFieldWidth = (12 * 12 - 2) * mmPerInch;   // the FTC field is ~11'10" center-to-center of the glass panels
-
-        /**
-         * In order for localization to work, we need to tell the system where each target we
-         * wish to use for navigation resides on the field, and we need to specify where on the robot
-         * the phone resides. These specifications are in the form of <em>transformation matrices.</em>
-         * Transformation matrices are a central, important concept in the math here involved in localization.
-         * See <a href="https://en.wikipedia.org/wiki/Transformation_matrix">Transformation Matrix</a>
-         * for detailed information. Commonly, you'll encounter transformation matrices as instances
-         * of the {@link OpenGLMatrix} class.
-         *
-         * For the most part, you don't need to understand the details of the math of how transformation
-         * matrices work inside (as fascinating as that is, truly). Just remember these key points:
-         * <ol>
-         *
-         *     <li>You can put two transformations together to produce a third that combines the effect of
-         *     both of them. If, for example, you have a rotation transform R and a translation transform T,
-         *     then the combined transformation matrix RT which does the rotation first and then the translation
-         *     is given by {@code RT = T.multiplied(R)}. That is, the transforms are multiplied in the
-         *     <em>reverse</em> of the chronological order in which they applied.</li>
-         *
-         *     <li>A common way to create useful transforms is to use methods in the {@link OpenGLMatrix}
-         *     class and the Orientation class. See, for example, {@link OpenGLMatrix#translation(float,
-         *     float, float)}, {@link OpenGLMatrix#rotation(AngleUnit, float, float, float, float)}, and
-         *     {@link Orientation#getRotationMatrix(AxesReference, AxesOrder, AngleUnit, float, float, float)}.
-         *     Related methods in {@link OpenGLMatrix}, such as {@link OpenGLMatrix#rotated(AngleUnit,
-         *     float, float, float, float)}, are syntactic shorthands for creating a new transform and
-         *     then immediately multiplying the receiver by it, which can be convenient at times.</li>
-         *
-         *     <li>If you want to break open the black box of a transformation matrix to understand
-         *     what it's doing inside, use {@link MatrixF#getTranslation()} to fetch how much the
-         *     transform will move you in x, y, and z, and use {@link Orientation#getOrientation(MatrixF,
-         *     AxesReference, AxesOrder, AngleUnit)} to determine the rotational motion that the transform
-         *     will impart. See {@link #format(OpenGLMatrix)} below for an example.</li>
-         *
-         * </ol>
-         *
-         * This example places the "stones" image on the perimeter wall to the Left
-         *  of the Red Driver station wall.  Similar to the Red Beacon Location on the Res-Q
-         *
-         * This example places the "chips" image on the perimeter wall to the Right
-         *  of the Blue Driver station.  Similar to the Blue Beacon Location on the Res-Q
-         *
-         * See the doc folder of this project for a description of the field Axis conventions.
-         *
-         * Initially the target is conceptually lying at the origin of the field's coordinate system
-         * (the center of the field), facing up.
-         *
-         * In this configuration, the target's coordinate system aligns with that of the field.
-         *
-         * In a real situation we'd also account for the vertical (Z) offset of the target,
-         * but for simplicity, we ignore that here; for a real robot, you'll want to fix that.
-         *
-         * To place the Stones Target on the Red Audience wall:
-         * - First we rotate it 90 around the field's X axis to flip it upright
-         * - Then we rotate it  90 around the field's Z access to face it away from the audience.
-         * - Finally, we translate it back along the X axis towards the red audience wall.
-         */
-        OpenGLMatrix blueMiddleLocationOnField = OpenGLMatrix
-                /* Then we translate the target off to the RED WALL. Our translation here
-                is a negative translation in X.*/
-                .translation(-mmFTCFieldWidth / 2, 0, 0)
-                .multiplied(Orientation.getRotationMatrix(
-                        /* First, in the fixed (field) coordinate system, we rotate 90deg in X, then 90 in Z */
-                        AxesReference.EXTRINSIC, AxesOrder.XZX,
-                        AngleUnit.DEGREES, 90, 90, 0));
-        blueMiddle.setLocation(blueMiddleLocationOnField);
-        RobotLog.ii(TAG, "Blue Middle=%s", format(blueMiddleLocationOnField));
-
-       /*
-        * To place the Stones Target on the Blue Audience wall:
-        * - First we rotate it 90 around the field's X axis to flip it upright
-        * - Finally, we translate it along the Y axis towards the blue audience wall.
-        */
-        OpenGLMatrix blueCornerLocationOnField = OpenGLMatrix
-                /* Then we translate the target off to the Blue Audience wall.
-                Our translation here is a positive translation in Y.*/
-                .translation(0, mmFTCFieldWidth / 2, 0)
-                .multiplied(Orientation.getRotationMatrix(
-                        /* First, in the fixed (field) coordinate system, we rotate 90deg in X */
-                        AxesReference.EXTRINSIC, AxesOrder.XZX,
-                        AngleUnit.DEGREES, 90, 0, 0));
-        blueCorner.setLocation(blueCornerLocationOnField);
-        RobotLog.ii(TAG, "Blue Target=%s", format(blueCornerLocationOnField));
-
-        OpenGLMatrix redMiddleLocationOnField = OpenGLMatrix
-                /* Then we translate the target off to the RED WALL. Our translation here
-                is a negative translation in X.*/
-                .translation(-mmFTCFieldWidth / 2, 0, 0)
-                .multiplied(Orientation.getRotationMatrix(
-                        /* First, in the fixed (field) coordinate system, we rotate 90deg in X, then 90 in Z */
-                        AxesReference.EXTRINSIC, AxesOrder.XZX,
-                        AngleUnit.DEGREES, 90, 90, 0));
-        redMiddle.setLocation(redMiddleLocationOnField);
-        RobotLog.ii(TAG, "Red Target=%s", format(redMiddleLocationOnField));
-
-       /*
-        * To place the Stones Target on the Blue Audience wall:
-        * - First we rotate it 90 around the field's X axis to flip it upright
-        * - Finally, we translate it along the Y axis towards the blue audience wall.
-        */
-        OpenGLMatrix redCornerLocationOnField = OpenGLMatrix
-                /* Then we translate the target off to the Blue Audience wall.
-                Our translation here is a positive translation in Y.*/
-                .translation(0, mmFTCFieldWidth / 2, 0)
-                .multiplied(Orientation.getRotationMatrix(
-                        /* First, in the fixed (field) coordinate system, we rotate 90deg in X */
-                        AxesReference.EXTRINSIC, AxesOrder.XZX,
-                        AngleUnit.DEGREES, 90, 0, 0));
-        redCorner.setLocation(redCornerLocationOnField);
-        RobotLog.ii(TAG, "Blue Target=%s", format(redCornerLocationOnField));
-
-
-        /**
-         * Create a transformation matrix describing where the phone is on the robot. Here, we
-         * put the phone on the right hand side of the robot with the screen facing in (see our
-         * choice of BACK camera above) and in landscape mode. Starting from alignment between the
-         * robot's and phone's axes, this is a rotation of -90deg along the Y axis.
-         *
-         * When determining whether a rotation is positive or negative, consider yourself as looking
-         * down the (positive) axis of rotation from the positive towards the origin. Positive rotations
-         * are then CCW, and negative rotations CW. An example: consider looking down the positive Z
-         * axis towards the origin. A positive rotation about Z (ie: a rotation parallel to the the X-Y
-         * plane) is then CCW, as one would normally expect from the usual classic 2D geometry.
-         */
-        OpenGLMatrix phoneLocationOnRobot = OpenGLMatrix
-                .translation(mmBotWidth / 2, 0, 0)
-                .multiplied(Orientation.getRotationMatrix(
-                        AxesReference.EXTRINSIC, AxesOrder.YZY,
-                        AngleUnit.DEGREES, -90, 0, 0));
-        RobotLog.ii(TAG, "phone=%s", format(phoneLocationOnRobot));
-
-        /**
-         * Let the trackable listeners we care about know where the phone is. We know that each
-         * listener is a {@link VuforiaTrackableDefaultListener} and can so safely cast because
-         * we have not ourselves installed a listener of a different type.
-         */
-        ((VuforiaTrackableDefaultListener) redCorner.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener) blueCorner.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener) redMiddle.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
-        ((VuforiaTrackableDefaultListener) blueMiddle.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
-
-        /**
-         * A brief tutorial: here's how all the math is going to work:
-         *
-         * C = phoneLocationOnRobot  maps   phone coords -> robot coords
-         * P = tracker.getPose()     maps   image target coords -> phone coords
-         * L = redTargetLocationOnField maps   image target coords -> field coords
-         *
-         * So
-         *
-         * C.inverted()              maps   robot coords -> phone coords
-         * P.inverted()              maps   phone coords -> imageTarget coords
-         *
-         * Putting that all together,
-         *
-         * L x P.inverted() x C.inverted() maps robot coords to field coords.
-         *
-         * @see VuforiaTrackableDefaultListener#getRobotLocation()
-         */
-
+        // Start tracking the data sets we care about.
+        VuforiaTrackableDefaultListener wheels = (VuforiaTrackableDefaultListener) FTCImages.get(0).getListener();
+        VuforiaTrackableDefaultListener tools  = (VuforiaTrackableDefaultListener) FTCImages.get(1).getListener();
+        VuforiaTrackableDefaultListener legos  = (VuforiaTrackableDefaultListener) FTCImages.get(2).getListener();
+        VuforiaTrackableDefaultListener gears  = (VuforiaTrackableDefaultListener) FTCImages.get(3).getListener();
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Resetting Encoders");
         telemetry.update();
@@ -329,8 +158,6 @@ public class AutoVuforia extends LinearOpMode {
         // Set the motors to encoder mode
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        // variable to turn on and off the LED on the Color sensor
-        boolean bLedOn = true;
         // get a reference to our ColorSensor object.
         colorSensor = hardwareMap.colorSensor.get("color sensor");
         // Set the LED in the beginning
@@ -346,9 +173,7 @@ public class AutoVuforia extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        // Start tracking the data sets we care about.
-        VuforiaTrackableDefaultListener wheels = (VuforiaTrackableDefaultListener) FTCImages.get(0).getListener();
-        // tell vuforia to activate the images
+       // tell vuforia to start to track the images
         FTCImages.activate();
         // set the motors to encoder mode
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -357,7 +182,7 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setPower(1.0);
         rightmotor.setPower(1.0);
         // until we find an image in the camera from vuforia
-        while (opModeIsActive() && wheels.getRawPose() == null) {
+        while (opModeIsActive() && tools.getRawPose() == null && legos.getRawPose() == null) { //legos = bluecorner, tools = redcorner
         //slow down the look so we dont go hyper
             idle();
         }
@@ -367,10 +192,49 @@ public class AutoVuforia extends LinearOpMode {
         //Tell the driver we see an image
         telemetry.addData("running - after sees image", null);
         telemetry.update();
+        // mark what side we are on
+        if (legos.getRawPose() != null){
+            bBlueSide = true;
+            goToImagePushButton(legos);
+        } else {
+            bRedSide = true;
+            goToImagePushButton(tools);
+        }
+        encoderDrive(DRIVE_SPEED,  -6,  -6, 5.0);  // S1: Backward 5 Inches with 5 Sec timeout
+        if (bBlueSide){
+            encoderDrive(TURN_SPEED,   -6, 6, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 45 degrees
+        } else {
+            encoderDrive(TURN_SPEED,   6, -6, 4.0);  // S2: Turn Right 6 Inches with 4 Sec timeout or 45 degrees
+        }
+        encoderDrive(DRIVE_SPEED, -68, -68, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
+        if (bBlueSide){
+            encoderDrive(TURN_SPEED,   6, -6, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
+        } else {
+            encoderDrive(TURN_SPEED,   -6, 6, 4.0);  // S2: Turn left 6 Inches with 4 Sec timeout or 45 degrees
+        }
+        // mark what side we are on
+        if (bBlueSide){
+            goToImagePushButton(wheels);
+        } else {
+            goToImagePushButton(gears);
+        }
+        encoderDrive(DRIVE_SPEED,  -60,  -60, 8.0);  // S1: Backward 5 Inches with 5 Sec timeout
+        if (bBlueSide){
+            encoderDrive(TURN_SPEED,   6, -6, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
+        } else {
+            encoderDrive(TURN_SPEED,   -6, 6, 4.0);  // S2: Turn Right 6 Inches with 4 Sec timeout or 45 degrees
+        }
+        encoderDrive(DRIVE_SPEED, -72, -72, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
+    }
+/*
+* based in the image object that is passed in calculate angles and go to the image.  once you arrive at the image
+* determine the color of the right beacon and press the appropriate button.
+*/
+    private void goToImagePushButton(VuforiaTrackableDefaultListener myImage) throws InterruptedException {
         // get the angle to the image
-        VectorF angles = anglesFromTarget(wheels);
+        VectorF angles = anglesFromTarget(myImage);
         // figure out how far to go
-        VectorF trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
+        VectorF trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
         // adjust to the right angle to go
         if(trans.get(0) > 0) {
             leftmotor.setPower(0.05);
@@ -379,13 +243,10 @@ public class AutoVuforia extends LinearOpMode {
             leftmotor.setPower(-0.05);
             rightmotor.setPower(0.05);
         }
-        // tell the driver again
-        telemetry.addData("running - first alignment", null);
-        telemetry.update();
         // using the current position keep going until it matches where we want to be
         do {
-            if (wheels.getPose() != null) {
-                trans = navOffWall(wheels.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
+            if (myImage.getPose() != null) {
+                trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
             }
             idle();
         } while (opModeIsActive() && Math.abs(trans.get(0)) > 30);
@@ -400,7 +261,7 @@ public class AutoVuforia extends LinearOpMode {
         rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         // set the target position for each motor
         leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *1440))));
-        rightmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *1440))));
+        rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *1440))));
         //just a little power to get there
         leftmotor.setPower(0.15);
         rightmotor.setPower(0.15);
@@ -418,9 +279,9 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // turn to get get robot square with the images
-        while (opModeIsActive() && (wheels.getPose() == null || Math.abs(wheels.getPose().getTranslation().get(0)) > 10)){
-            if(wheels.getPose() != null) {
-                if (wheels.getPose().getTranslation().get(0) > 0) {
+        while (opModeIsActive() && (myImage.getPose() == null || Math.abs(myImage.getPose().getTranslation().get(0)) > 10)){
+            if(myImage.getPose() != null) {
+                if (myImage.getPose().getTranslation().get(0) > 0) {
                     leftmotor.setPower(0.03);
                     rightmotor.setPower(-0.03);
                 } else {
@@ -445,6 +306,7 @@ public class AutoVuforia extends LinearOpMode {
 //        while (opModeIsActive() && (!lefttouchSensor.isPressed() || !righttouchSensor.isPressed())) {
 //             idle();
 //        }
+        encoderDrive(0.15,  6,  6, 5.0);  // S1: Forward 6 Inches with 5 Sec timeout
         //Touched the wall now stop
         leftmotor.setPower(0);
         rightmotor.setPower(0);
@@ -457,44 +319,42 @@ public class AutoVuforia extends LinearOpMode {
         // send the info back to driver station using telemetry function.
         telemetry.addData("LED", bLedOn ? "On" : "Off");
         telemetry.addData("Clear", colorSensor.alpha());
-        telemetry.addData("Red  ", colorSensor.red());
-        telemetry.addData("Green", colorSensor.green());
-        telemetry.addData("Blue ", colorSensor.blue());
+        telemetry.addData("Red  ", colorSensor.red() * 8);
+        telemetry.addData("Green", colorSensor.green() * 8);
+        telemetry.addData("Blue ", colorSensor.blue() * 8);
         telemetry.addData("Hue", hsvValues[0]);
         telemetry.addData("Saturation", hsvValues[1]);
         telemetry.addData("Value", hsvValues[2]);
         // TODO based on the side we are on red or blue and the color of the right side of the beacon..
-        // push the button on the right
-        servo.setPosition(MAX_POS);
-        // allow the servo to move
-        sleep(CYCLE_MS);
-
-        for (VuforiaTrackable trackable : allTrackables) {
-            /**
-             * getUpdatedRobotLocation() will return null if no new information is available since
-             * the last time that call was made, or if the trackable is not currently visible.
-             * getRobotLocation() will return null if the trackable is not currently visible.
-             */
-            telemetry.addData(trackable.getName(), ((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible() ? "Visible" : "Not Visible");    //
-
-            OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-            if (robotLocationTransform != null) {
-                lastLocation = robotLocationTransform;
-            }
-            /**
-             * Provide feedback as to where the robot was last located (if we know).
-             */
-            if (lastLocation != null) {
-                //  RobotLog.vv(TAG, "robot=%s", format(lastLocation));
-                telemetry.addData("Pos", format(lastLocation));
-            } else {
-                telemetry.addData("Pos", "Unknown");
-            }
-            telemetry.update();
-            idle();
+        if (bBlueSide && hsvValues[0] > 100){ // on blue side and hue > 100 is blue
+            // push the button on the left
+            servo.setPosition(MIN_POS);
+            // allow the servo to move
+            sleep(CYCLE_MS);
         }
+        if (bBlueSide && hsvValues[0] < 100){ // on blue side and hue < 100 is red
+            // push the button on the right
+            servo.setPosition(MAX_POS);
+            // allow the servo to move
+            sleep(CYCLE_MS);
+        }
+        if (bRedSide && hsvValues[0] > 100){ // on red side and hue > 100 is blue
+            // push the button on the right
+            servo.setPosition(MAX_POS);
+            // allow the servo to move
+            sleep(CYCLE_MS);
+        }
+        if (bBlueSide && hsvValues[0] < 100){ // on red side and hue < 100 is Red
+            // push the button on the Left
+            servo.setPosition(MIN_POS);
+            // allow the servo to move
+            sleep(CYCLE_MS);
+        }
+        // reset to neutral position
+        servo.setPosition(position);
     }
-/**
+
+    /**
  * A simple utility that extracts positioning information from a transformation matrix
  * and formats it in a form palatable to a human being.
  */

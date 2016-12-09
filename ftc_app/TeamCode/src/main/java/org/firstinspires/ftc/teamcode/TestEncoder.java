@@ -73,6 +73,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  */
 
 @Autonomous(name="TestEncoder", group="Autonomous")
+@Disabled
 
 
 public class TestEncoder extends LinearOpMode {

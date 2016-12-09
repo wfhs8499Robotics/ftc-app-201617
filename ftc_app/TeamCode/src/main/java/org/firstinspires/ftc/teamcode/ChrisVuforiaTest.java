@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name = "ChrisVuforiaTest", group = "Autonomous OpMode")
+@Disabled
 //@Override
 public class ChrisVuforiaTest extends LinearOpMode {
     public static final String TAG = "Vuforia Sample";

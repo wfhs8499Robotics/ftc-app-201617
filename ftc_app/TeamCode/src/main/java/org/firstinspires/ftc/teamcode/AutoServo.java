@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Created by Mike on 12/6/2016.
  */
 @Autonomous(name = "AutoServo", group = "Autonomous OpMode")
-
+@Disabled
 public class AutoServo extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
