@@ -33,6 +33,10 @@ public class DriverMode extends OpMode {
     float pushbeaconright;
     float pushbeaconleft;
     boolean centerservo;
+    boolean bSeanMode = false;
+    boolean bFastMode = false;
+    boolean bSeanButtonPushed = false;
+    boolean bFastButtonPushed = false;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -82,6 +86,27 @@ public class DriverMode extends OpMode {
         pushbeaconright = gamepad2.right_trigger;
         pushbeaconleft = gamepad2.left_trigger;
         centerservo = gamepad2.y;
+        // if either trigger has started to be pushed, wait til it goes to 0 to toggle modes
+        if (hypermode > 0){
+            bFastButtonPushed = true;
+        }
+        if (hypermode == 0 && bFastButtonPushed == true){
+            bFastButtonPushed = false;
+            bFastMode = !bFastMode;
+            if (bFastMode){
+                bSeanMode = false;
+            }
+        }
+        if (seanmode > 0){
+            bSeanButtonPushed = true;
+        }
+        if (seanmode == 0 && bSeanButtonPushed == true){
+            bSeanButtonPushed = false;
+            bSeanMode = !bSeanMode;
+            if (bSeanMode){
+                bFastMode = false;
+            }
+        }
         // move the servo forward on the right
         if (pushbeaconright > 0){
             servo.setPosition(MAX_POS);
@@ -97,17 +122,19 @@ public class DriverMode extends OpMode {
         // set drive adjustment to the default stick percent
         driveadjustment = StickPercent;
         // change the drive adjustment for hypermode
-        if (hypermode > 0){
+        if (bFastMode){
             driveadjustment = StickPercent * 2.0f;
         }
         // change the drive adjustment to slow mode
-        if (seanmode > 0){
+        if (bSeanMode){
             driveadjustment = StickPercent * 0.5f;
         }
         // set the power of the motor to the stick value multiplied by the adjustment
         leftmotor.setPower(left * driveadjustment);
         rightmotor.setPower(right * driveadjustment);
         // Tell the driver
+        telemetry.addData("Fast Mode", bFastMode);
+        telemetry.addData("Sean Mode", bSeanMode);
         telemetry.addData("left",  "%.2f", left * driveadjustment);
         telemetry.addData("right", "%.2f", right * driveadjustment);
         if (pushbeaconright > 0){
