@@ -175,12 +175,16 @@ public class AutoVuforia extends LinearOpMode {
         waitForStart();
        // tell vuforia to start to track the images
         FTCImages.activate();
+        encoderDrive(DRIVE_SPEED,  71,  71, 8.0);  // S1: forward 64 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   78,  78, 8.0);  // S3: forward 12 Inches with 4 Sec timeout
+
         // set the motors to encoder mode
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // full steam ahead
-        leftmotor.setPower(1.0);
-        rightmotor.setPower(1.0);
+//        leftmotor.setPower(0.6);
+//        rightmotor.setPower(0.6);
         // until we find an image in the camera from vuforia
         while (opModeIsActive() && tools.getRawPose() == null && legos.getRawPose() == null) { //legos = bluecorner, tools = redcorner
         //slow down the look so we dont go hyper
@@ -212,7 +216,7 @@ public class AutoVuforia extends LinearOpMode {
         } else {
             encoderDrive(TURN_SPEED,   -6, 6, 4.0);  // S2: Turn left 6 Inches with 4 Sec timeout or 45 degrees
         }
-        // mark what side we are on
+        // go to the other image on our side
         if (bBlueSide){
             goToImagePushButton(wheels);
         } else {
@@ -224,7 +228,7 @@ public class AutoVuforia extends LinearOpMode {
         } else {
             encoderDrive(TURN_SPEED,   -6, 6, 4.0);  // S2: Turn Right 6 Inches with 4 Sec timeout or 45 degrees
         }
-        encoderDrive(DRIVE_SPEED, -72, -72, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
+//        encoderDrive(DRIVE_SPEED, -72, -72, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
     }
 /*
 * based in the image object that is passed in calculate angles and go to the image.  once you arrive at the image
