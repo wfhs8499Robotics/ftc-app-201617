@@ -39,6 +39,8 @@ public class AutoVuforia extends LinearOpMode {
     public static final String TAG = "AutoVuforia"; // String for logging
     OpenGLMatrix lastLocation = null;
     int i;
+    //  Debug program / display messages- yes or no
+    boolean debugFlag = true;
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -59,7 +61,7 @@ public class AutoVuforia extends LinearOpMode {
     DcMotor rightmotor = null; // Hardware Device Object
     TouchSensor lefttouchSensor = null;  // Hardware Device Object
     TouchSensor righttouchSensor = null;  // Hardware Device Object
-    ColorSensor colorSensor = null;    // Hardware Device Object
+//    ColorSensor colorSensor = null;    // Hardware Device Object
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
@@ -159,25 +161,26 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // get a reference to our ColorSensor object.
-        colorSensor = hardwareMap.colorSensor.get("color sensor");
+        telemetry.addData("Status", "Done - Resetting Encoders");
+        telemetry.update();
+//        colorSensor = hardwareMap.colorSensor.get("color sensor");
         // Set the LED in the beginning
-        colorSensor.enableLed(bLedOn);
+//        colorSensor.enableLed(bLedOn);
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0",  "Starting at %7d :%7d",
                 leftmotor.getCurrentPosition(),
                 rightmotor.getCurrentPosition());
+        // tell vuforia to start to track the images
+        FTCImages.activate();
 
         // tell the driver everything is ready to go
-        telemetry.addData(">", "Finished initiating, press play to start moving");
-        telemetry.addData(">", "Vuforia ready");
+        telemetry.addData(">", "Finished initiating, Vuforia ready, press play to start moving");
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-       // tell vuforia to start to track the images
-        FTCImages.activate();
-        encoderDrive(DRIVE_SPEED,  71,  71, 8.0);  // S1: forward 64 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   78,  78, 8.0);  // S3: forward 12 Inches with 4 Sec timeout
+//        encoderDrive(DRIVE_SPEED,  71,  71, 8.0);  // S1: forward 64 Inches with 5 Sec timeout
+//        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+//        encoderDrive(TURN_SPEED,   78,  78, 8.0);  // S3: forward 12 Inches with 4 Sec timeout
 
         // set the motors to encoder mode
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -194,8 +197,11 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setPower(0);
         rightmotor.setPower(0);
         //Tell the driver we see an image
-        telemetry.addData("running - after sees image", null);
-        telemetry.update();
+        if (debugFlag)  {
+            telemetry.addData("sees image", null);
+            telemetry.update();
+        }
+
         // mark what side we are on
         if (legos.getRawPose() != null){
             bBlueSide = true;
@@ -237,9 +243,20 @@ public class AutoVuforia extends LinearOpMode {
     private void goToImagePushButton(VuforiaTrackableDefaultListener myImage) throws InterruptedException {
         // get the angle to the image
         VectorF angles = anglesFromTarget(myImage);
+        if (debugFlag){
+            telemetry.addData("angles = ", angles);
+            telemetry.update();
+            sleep(2000);
+        }
+
         // figure out how far to go
         VectorF trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
         // adjust to the right angle to go
+        if (debugFlag){
+            telemetry.addData("trans = ", trans);
+            telemetry.update();
+            sleep(2000);
+        }
         if(trans.get(0) > 0) {
             leftmotor.setPower(0.05);
             rightmotor.setPower(-0.05);
@@ -251,6 +268,11 @@ public class AutoVuforia extends LinearOpMode {
         do {
             if (myImage.getPose() != null) {
                 trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
+                if (debugFlag){
+                    telemetry.addData("trans = ", trans);
+                    telemetry.update();
+                    sleep(1000);
+                }
             }
             idle();
         } while (opModeIsActive() && Math.abs(trans.get(0)) > 30);
@@ -258,27 +280,38 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setPower(0);
         rightmotor.setPower(0);
         // tell the driver
-        telemetry.addData("running - keep moving to see the image", null);
-        telemetry.update();
+        if (debugFlag){
+            telemetry.addData("trans = ", trans);
+            telemetry.update();
+            sleep(1000);
+        }
         // now go to in front of the image using run to position
         leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         // set the target position for each motor
-        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *1440))));
-        rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150 / 319.186 *1440))));
+        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) *1440)));
+        rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) *1440)));
         //just a little power to get there
+        if (debugFlag){
+            telemetry.addData("new position = ", ((int) (leftmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) *1440))));
+            telemetry.update();
+            sleep(1000);
+        }
+
         leftmotor.setPower(0.15);
         rightmotor.setPower(0.15);
         // while we are moving.. just wait
         while(opModeIsActive() && leftmotor.isBusy() && rightmotor.isBusy()){
           idle();
         }
+        if (debugFlag){
+            telemetry.addData("trans = ", trans);
+            telemetry.update();
+            sleep(1000);
+        }
         // there!  now Stop
         leftmotor.setPower(0);
         rightmotor.setPower(0);
-        // tell the driver
-        telemetry.addData("running - moved to in front of image", null);
-        telemetry.update();
         //  set the motors back to encoder mode.
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -297,12 +330,9 @@ public class AutoVuforia extends LinearOpMode {
                 rightmotor.setPower(0.15);
                 }
         }
-        //Stop..  we are right in front of the image
-        leftmotor.setPower(0);
+        //Stop..  we are right in front of the imagemo$
+
         rightmotor.setPower(0);
-        //Tell the driver
-        telemetry.addData("running - after repositioning", null);
-        telemetry.update();
         //Move forward to be able to push the buttons
         leftmotor.setPower(0.15);
         rightmotor.setPower(0.15);
@@ -319,13 +349,13 @@ public class AutoVuforia extends LinearOpMode {
         telemetry.update();
         // check the color sensor to see what button to press
         // convert the RGB values to HSV values.
-        Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
+//        Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
         // send the info back to driver station using telemetry function.
         telemetry.addData("LED", bLedOn ? "On" : "Off");
-        telemetry.addData("Clear", colorSensor.alpha());
-        telemetry.addData("Red  ", colorSensor.red() * 8);
-        telemetry.addData("Green", colorSensor.green() * 8);
-        telemetry.addData("Blue ", colorSensor.blue() * 8);
+//        telemetry.addData("Clear", colorSensor.alpha());
+//        telemetry.addData("Red  ", colorSensor.red() * 8);
+//        telemetry.addData("Green", colorSensor.green() * 8);
+//        telemetry.addData("Blue ", colorSensor.blue() * 8);
         telemetry.addData("Hue", hsvValues[0]);
         telemetry.addData("Saturation", hsvValues[1]);
         telemetry.addData("Value", hsvValues[2]);

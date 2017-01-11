@@ -15,6 +15,8 @@ public class DriverMode extends OpMode {
 
     DcMotor leftmotor = null;   // Hardware Device Object
     DcMotor rightmotor = null;  // Hardware Device Object
+    DcMotor leftshooter = null;   // Hardware Device Object
+    DcMotor rightshooter = null;  // Hardware Device Object
     Servo servo = null;         // Hardware Device Object
 
     float StickPercent = 0.5f;  // only use 50 percent power as the default speed at full throttle
@@ -27,6 +29,8 @@ public class DriverMode extends OpMode {
     // all the variables we need
     double left;
     double right;
+    boolean leftshooterwheel;
+    boolean rightshooterwheel;
     float hypermode;
     float seanmode;
     float driveadjustment;
@@ -49,6 +53,10 @@ public class DriverMode extends OpMode {
         leftmotor = hardwareMap.dcMotor.get("left motor");
         leftmotor.setDirection(DcMotor.Direction.REVERSE);
         rightmotor = hardwareMap.dcMotor.get("right motor");
+        // get the motor objects created
+        leftshooter = hardwareMap.dcMotor.get("left");
+        leftshooter.setDirection(DcMotor.Direction.REVERSE);
+        rightshooter = hardwareMap.dcMotor.get("right");
         // Get the servo object created
         servo = hardwareMap.servo.get("button pusher");
         //position the servo to center
@@ -85,6 +93,8 @@ public class DriverMode extends OpMode {
         seanmode = gamepad1.left_trigger;
         pushbeaconright = gamepad2.right_trigger;
         pushbeaconleft = gamepad2.left_trigger;
+        leftshooterwheel = gamepad2.left_bumper;
+        rightshooterwheel = gamepad2.right_bumper;
         centerservo = gamepad2.y;
         // if either trigger has started to be pushed, wait til it goes to 0 to toggle modes
         if (hypermode > 0){
@@ -132,6 +142,11 @@ public class DriverMode extends OpMode {
         // set the power of the motor to the stick value multiplied by the adjustment
         leftmotor.setPower(left * driveadjustment);
         rightmotor.setPower(right * driveadjustment);
+        if (leftshooterwheel || rightshooterwheel){
+            leftshooter.setPower(1.0);
+            rightshooter.setPower(1.0);
+        }
+
         // Tell the driver
         telemetry.addData("Fast Mode", bFastMode);
         telemetry.addData("Sean Mode", bSeanMode);
