@@ -118,6 +118,7 @@ public class AutoVuforia extends LinearOpMode {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId);
         parameters.vuforiaLicenseKey = "Adzda7//////AAAAGUpLKy6pMUL/jHraDyelv1GA1V8dkeOGLZerg9xBjHAW7cFALsf5Y+T8b6ncYMV+CBje6cvECbbmiEejmvrqDxC0W38xIZN9vyMNGne7E+GXMwVf5gJlg4XTmI38GZ2S4d8y2/qqglzoMDElNJJA7Az97KS84DI+6odaFViAUnvfc4dX5aSX4h0KmBqRUH9761EGNsnz2IQz5/tYAAs9hsMDsBk/fSadAT9NZoc/4l5iJKwlVhKk7avboqJcQx0yzVIUwyjwdCco4SMX+EhSkDuOyaUUK8odF2DOWmsA+x491hpM1qnrGX6XlAJ5npFNQO+pH5D5vNn2HtcUm/a882RCJ0Vu6BasSJrdgJugiway";
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
         Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
 
@@ -287,12 +288,13 @@ public class AutoVuforia extends LinearOpMode {
             telemetry.update();
             sleep(1000);
         }
+        // we are at the right angle now to walk to the position
         // now go to in front of the image using run to position
         leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         // set the target position for each motor
-        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) *1440)));
-        rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) *1440)));
+        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
+        rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
         //just a little power to get there
         if (debugFlag){
             telemetry.addData("new position = ", ((int) (leftmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) *1440))));
@@ -333,7 +335,7 @@ public class AutoVuforia extends LinearOpMode {
                 }
         }
         //Stop..  we are right in front of the imagemo$
-
+        leftmotor.setPower(0);
         rightmotor.setPower(0);
         //Move forward to be able to push the buttons
         leftmotor.setPower(0.15);
@@ -400,9 +402,9 @@ String format(OpenGLMatrix transformationMatrix) {
 
 public VectorF navOffWall(VectorF trans, double robotAngle, VectorF offWall){
     if (debugFlag){
-        telemetry.addData("now trans = ", trans);
-        telemetry.addData("now robot angle = ", robotAngle);
-        telemetry.addData("now off wall", offWall);
+        telemetry.addData("now - trans = ", trans);
+        telemetry.addData("now - robot angle = ", robotAngle);
+        telemetry.addData("now - off wall", offWall);
         telemetry.update();
         sleep(1000);
     }
