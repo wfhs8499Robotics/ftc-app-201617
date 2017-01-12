@@ -270,6 +270,8 @@ public class AutoVuforia extends LinearOpMode {
                 trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
                 if (debugFlag){
                     telemetry.addData("trans = ", trans);
+                    telemetry.addData("image position translation = ", myImage.getPose().getTranslation());
+                    telemetry.addData("degrees = ", Math.toDegrees(angles.get(0)) - 90);
                     telemetry.update();
                     sleep(1000);
                 }
@@ -397,12 +399,27 @@ String format(OpenGLMatrix transformationMatrix) {
 }
 
 public VectorF navOffWall(VectorF trans, double robotAngle, VectorF offWall){
+    if (debugFlag){
+        telemetry.addData("now trans = ", trans);
+        telemetry.addData("now robot angle = ", robotAngle);
+        telemetry.addData("now off wall", offWall);
+        telemetry.update();
+        sleep(1000);
+    }
+
     return new VectorF((float) (trans.get(0) - offWall.get(0) * Math.sin(Math.toRadians(robotAngle)) - offWall.get(2) * Math.cos(Math.toRadians(robotAngle))), trans.get(1), (float) (trans.get(2) + offWall.get(0) * Math.cos(Math.toRadians(robotAngle)) - offWall.get(2) * Math.sin(Math.toRadians(robotAngle))));
 }
 
 public VectorF anglesFromTarget(VuforiaTrackableDefaultListener image){
     float [] data = image.getRawPose().getData();
     float [] [] rotation = {{data[0], data[1]}, {data[4], data[5], data[6]}, {data[8], data[9], data[10]}};
+    if (debugFlag){
+        telemetry.addData("aft data = ", data);
+        telemetry.addData("aft rotation = ", rotation);
+        telemetry.update();
+        sleep(1000);
+    }
+
     double thetaX = Math.atan2(rotation[2][1], rotation[2][2]);
     double thetaY = Math.atan2(-rotation[2][0], Math.sqrt(rotation[2][1] * rotation[2][1] + rotation[2][2] * rotation[2][2]));
     double thetaZ = Math.atan2(rotation[1][0], rotation[0][0]);
