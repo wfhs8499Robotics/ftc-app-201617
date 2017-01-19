@@ -271,6 +271,7 @@ public class AutoVuforia extends LinearOpMode {
                 trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
                 if (debugFlag){
                     telemetry.addData("trans = ", trans);
+                    telemetry.addData("mat.abs trans.get(0)", Math.abs(trans.get(0)));
                     telemetry.addData("image position translation = ", myImage.getPose().getTranslation());
                     telemetry.addData("degrees = ", Math.toDegrees(angles.get(0)) - 90);
                     telemetry.update();
@@ -293,6 +294,19 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         // set the target position for each motor
+        if (debugFlag){
+            telemetry.addData("current = ", leftmotor.getCurrentPosition());
+            telemetry.addData("tran.get 0 = ", trans.get(0));
+            telemetry.addData("tran.get 2 = ", trans.get(2));
+            telemetry.addData("Hypoten = ", Math.hypot(trans.get(0), trans.get(2)) + 150);
+            telemetry.addData("wheel rotations to get there", (Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186);
+            telemetry.addData("ticks to get there", ((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) * 1440);
+            telemetry.addData("new position = ", ((int) (leftmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) * 1440))));
+
+            telemetry.update();
+            sleep(1000);
+        }
+
         leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
         rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
         //just a little power to get there
@@ -320,7 +334,12 @@ public class AutoVuforia extends LinearOpMode {
         leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // turn to get get robot square with the images
-        while (opModeIsActive() && (myImage.getPose() == null || Math.abs(myImage.getPose().getTranslation().get(0)) > 10)){
+            while (opModeIsActive() && (myImage.getPose() == null || Math.abs(myImage.getPose().getTranslation().get(0)) > 10)){
+                if (debugFlag) {
+                    telemetry.addData("close abs get 0 = ", Math.abs(myImage.getPose().getTranslation().get(0)));
+                    telemetry.update();
+                    sleep(1000);
+                }
             if(myImage.getPose() != null) {
                 if (myImage.getPose().getTranslation().get(0) > 0) {
                     leftmotor.setPower(0.03);
@@ -330,11 +349,16 @@ public class AutoVuforia extends LinearOpMode {
                     rightmotor.setPower(0.03);
                 }
             } else {
-                leftmotor.setPower(-0.15);
-                rightmotor.setPower(0.15);
+                if (bBlueSide) {
+                    leftmotor.setPower(0.15);
+                    rightmotor.setPower(-0.15);
+                } else {
+                    leftmotor.setPower(-0.15);
+                    rightmotor.setPower(0.15);
+                }
                 }
         }
-        //Stop..  we are right in front of the imagemo$
+        //Stop..  we are right in front of the image
         leftmotor.setPower(0);
         rightmotor.setPower(0);
         //Move forward to be able to push the buttons
