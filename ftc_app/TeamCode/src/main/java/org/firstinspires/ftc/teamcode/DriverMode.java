@@ -17,7 +17,8 @@ public class DriverMode extends OpMode {
     DcMotor rightmotor = null;  // Hardware Device Object
     DcMotor leftshooter = null;   // Hardware Device Object
     DcMotor rightshooter = null;  // Hardware Device Object
-    Servo servo = null;         // Hardware Device Object
+    Servo leftservo = null;         // Hardware Device Object
+    Servo rightservo = null;         // Hardware Device Object
 
     float StickPercent = 0.5f;  // only use 50 percent power as the default speed at full throttle
     // settings for the Servo
@@ -58,9 +59,11 @@ public class DriverMode extends OpMode {
         leftshooter.setDirection(DcMotor.Direction.REVERSE);
         rightshooter = hardwareMap.dcMotor.get("right");
         // Get the servo object created
-        servo = hardwareMap.servo.get("button pusher");
+        leftservo = hardwareMap.servo.get("left button pusher");
+        rightservo = hardwareMap.servo.get("right button pusher");
         //position the servo to center
-        servo.setPosition(position);
+        leftservo.setPosition(MIN_POS);
+        rightservo.setPosition(MIN_POS);
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver - I am ready");    //
         updateTelemetry(telemetry);
@@ -119,15 +122,18 @@ public class DriverMode extends OpMode {
         }
         // move the servo forward on the right
         if (pushbeaconright > 0){
-            servo.setPosition(MAX_POS);
+            rightservo.setPosition(MAX_POS);
+            leftservo.setPosition(MIN_POS);
         }
         // move the servo forward on the left
         if (pushbeaconleft > 0){
-            servo.setPosition(MIN_POS);
+            leftservo.setPosition(MAX_POS);
+            rightservo.setPosition(MIN_POS);
         }
         // center the servo
         if (centerservo){
-            servo.setPosition(position);
+            leftservo.setPosition(MIN_POS);
+            rightservo.setPosition(MIN_POS);
         }
         // set drive adjustment to the default stick percent
         driveadjustment = StickPercent;

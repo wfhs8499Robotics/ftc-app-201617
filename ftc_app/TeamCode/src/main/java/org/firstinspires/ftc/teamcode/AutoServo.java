@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Created by Mike on 12/6/2016.
  */
 @Autonomous(name = "AutoServo", group = "Autonomous OpMode")
-@Disabled
 public class AutoServo extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
@@ -19,7 +18,8 @@ public class AutoServo extends LinearOpMode {
     static final double MIN_POS     =  0.10;     // Minimum rotational position
 
     // Define class members
-    Servo servo;
+    Servo leftservo;
+    Servo rightservo;
     double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
     boolean rampUp = true;
 
@@ -27,9 +27,12 @@ public class AutoServo extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Change the text in quotes to match any servo name on your robot.
-        servo = hardwareMap.servo.get("button pusher");
 
-        servo.setPosition(position);
+        leftservo = hardwareMap.servo.get("left button pusher");
+        rightservo = hardwareMap.servo.get("right button pusher");
+
+        leftservo.setPosition(position);
+        rightservo.setPosition(position);
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
@@ -64,7 +67,8 @@ public class AutoServo extends LinearOpMode {
             telemetry.update();
 
             // Set the servo to the new position and pause;
-            servo.setPosition(position);
+            leftservo.setPosition(position);
+            rightservo.setPosition(position);
             sleep(CYCLE_MS);
             idle();
         }
