@@ -13,9 +13,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class AutoServo extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   50;     // period of each cycle
-    static final double MAX_POS     =  0.40;     // Maximum rotational position
-    static final double MIN_POS     =  0.10;     // Minimum rotational position
+    static final int    CYCLE_MS    =   0;     // period of each cycle
+    static final double MAX_POS     =  0.70;     // Maximum rotational position
+    static final double MIN_POS     =  0.05;     // Minimum rotational position
 
     // Define class members
     Servo leftservo;
@@ -30,9 +30,21 @@ public class AutoServo extends LinearOpMode {
 
         leftservo = hardwareMap.servo.get("left button pusher");
         rightservo = hardwareMap.servo.get("right button pusher");
+        leftservo.setDirection(Servo.Direction.REVERSE);
+
+        leftservo.setPosition(MIN_POS);
+        rightservo.setPosition(MIN_POS);
+
+        sleep(2000);
 
         leftservo.setPosition(position);
         rightservo.setPosition(position);
+
+        sleep(2000);
+
+        leftservo.setPosition(MAX_POS);
+        rightservo.setPosition(MAX_POS);
+
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );

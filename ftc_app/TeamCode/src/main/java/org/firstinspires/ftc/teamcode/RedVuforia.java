@@ -44,7 +44,9 @@ public class RedVuforia extends LinearOpMode {
     static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     WHEEL_DIAMETER_MM       = 101.6 ;   // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     COUNTS_PER_MM           = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_MM * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
     static final double     TURN_SPEED              = 0.5;
 
@@ -84,6 +86,7 @@ public class RedVuforia extends LinearOpMode {
         rightservo = hardwareMap.servo.get("right button pusher");
         leftservo.setPosition(MIN_POS);
         rightservo.setPosition(MIN_POS);
+//        leftservo.setDirection(Servo.Direction.REVERSE);
         int counter = 0;
         /**
          * Start up Vuforia, telling it the id of the view that we wish to use as the parent for
@@ -277,9 +280,9 @@ public class RedVuforia extends LinearOpMode {
             telemetry.update();
             sleep(1000);
         }
-
-        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
-        rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
+/*
+//        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
+//        rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
         //just a little power to get there
         if (debugFlag){
             telemetry.addData("new position = ", ((int) (leftmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) *1440))));
@@ -298,6 +301,8 @@ public class RedVuforia extends LinearOpMode {
             telemetry.update();
             sleep(1000);
         }
+ */
+        encoderDriveMM(0.4, Math.hypot(trans.get(0), trans.get(2)) + 150, Math.hypot(trans.get(0), trans.get(2)) + 150, 3);
         // there!  now Stop
         leftmotor.setPower(0);
         rightmotor.setPower(0);
@@ -433,6 +438,72 @@ public VectorF anglesFromTarget(VuforiaTrackableDefaultListener image){
             // Determine new target position, and pass to motor controller
             newLeftTarget = leftmotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
             newRightTarget = rightmotor.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            leftmotor.setTargetPosition(newLeftTarget);
+            rightmotor.setTargetPosition(newRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            leftmotor.setPower(Math.abs(speed));
+            rightmotor.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (leftmotor.isBusy() && rightmotor.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d",
+                        leftmotor.getCurrentPosition(),
+                        rightmotor.getCurrentPosition());
+                telemetry.update();
+
+                // Allow time for other processes to run.
+                idle();
+            }
+
+            // Stop all motion;
+            leftmotor.setPower(0);
+            rightmotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+
+    /*
+ *  Method to perform a relative move, based on encoder counts.
+ *  Encoders are not reset as the move is based on the current position.
+ *  Move will stop if any of three conditions occur:
+ *  1) Move gets to the desired position
+ *  2) Move runs out of time
+ *  3) Driver stops the opmode running.
+ *
+ *  Note: Reverse movement is obtained by setting a negative distance (not speed)
+ *      encoderDrive(DRIVE_SPEED,  480,  480, 5.0);  // S1: Forward 48 MMs with 5 Sec timeout
+ *      encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 MMs with 4 Sec timeout
+ *      encoderDrive(DRIVE_SPEED, -240, -240, 4.0);  // S3: Reverse 24 MMs with 4 Sec timeout
+ *
+ */
+    public void encoderDriveMM(double speed,
+                             double leftMMs, double rightMMs,
+                             double timeoutS) throws InterruptedException {
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = leftmotor.getCurrentPosition() + (int)(leftMMs * COUNTS_PER_MM);
+            newRightTarget = rightmotor.getCurrentPosition() + (int)(rightMMs * COUNTS_PER_MM);
             leftmotor.setTargetPosition(newLeftTarget);
             rightmotor.setTargetPosition(newRightTarget);
 
