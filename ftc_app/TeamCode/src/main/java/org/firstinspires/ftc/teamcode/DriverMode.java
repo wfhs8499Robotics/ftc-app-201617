@@ -22,8 +22,6 @@ public class DriverMode extends OpMode {
 
     float StickPercent = 0.5f;  // only use 50 percent power as the default speed at full throttle
     // settings for the Servo
-    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   50;     // period of each cycle
     static final double MAX_POS     =  0.70;     // Maximum rotational position
     static final double MIN_POS     =  0.05;     // Minimum rotational position
     double  position = ((MAX_POS - MIN_POS) / 2) + MIN_POS; // Start at halfway position
@@ -42,6 +40,7 @@ public class DriverMode extends OpMode {
     boolean bFastMode = false;
     boolean bSeanButtonPushed = false;
     boolean bFastButtonPushed = false;
+    boolean bShooterOn = false;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -55,9 +54,9 @@ public class DriverMode extends OpMode {
         leftmotor.setDirection(DcMotor.Direction.REVERSE);
         rightmotor = hardwareMap.dcMotor.get("right motor");
         // get the motor objects created
-//        leftshooter = hardwareMap.dcMotor.get("left");
-//        leftshooter.setDirection(DcMotor.Direction.REVERSE);
-//        rightshooter = hardwareMap.dcMotor.get("right");
+        leftshooter = hardwareMap.dcMotor.get("left");
+        leftshooter.setDirection(DcMotor.Direction.REVERSE);
+        rightshooter = hardwareMap.dcMotor.get("right");
         // Get the servo object created
         leftservo = hardwareMap.servo.get("left button pusher");
         rightservo = hardwareMap.servo.get("right button pusher");
@@ -89,8 +88,7 @@ public class DriverMode extends OpMode {
     @Override
     public void loop() {
         // Run wheels in tank mode (note: The joystick goes negative when pushed forwards, so negate it)
-
-// get all the gamepad variables
+        // get all the gamepad variables
         left = -gamepad1.left_stick_y;
         right = -gamepad1.right_stick_y;
         hypermode = gamepad1.right_trigger;
@@ -149,17 +147,25 @@ public class DriverMode extends OpMode {
         // set the power of the motor to the stick value multiplied by the adjustment
         leftmotor.setPower(left * driveadjustment);
         rightmotor.setPower(right * driveadjustment);
-/*
-        if (leftshooterwheel || rightshooterwheel){
-            leftshooter.setPower(1.0);
-            rightshooter.setPower(1.0);
+
+        if (leftshooterwheel || rightshooterwheel) {
+            if (bShooterOn) {
+                leftshooter.setPower(0.0);
+                rightshooter.setPower(0.0);
+                bShooterOn = false;
+            } else {
+                leftshooter.setPower(1.0);
+                rightshooter.setPower(1.0);
+                bShooterOn = true;
+            }
         }
-*/
+
         // Tell the driver
         telemetry.addData("Fast Mode", bFastMode);
         telemetry.addData("Sean Mode", bSeanMode);
         telemetry.addData("left",  "%.2f", left * driveadjustment);
         telemetry.addData("right", "%.2f", right * driveadjustment);
+        telemetry.addData("Shooter", bShooterOn);
         if (pushbeaconright > 0){
             telemetry.addData("servo", "servo right pushed %.2f", MAX_POS);
         }
