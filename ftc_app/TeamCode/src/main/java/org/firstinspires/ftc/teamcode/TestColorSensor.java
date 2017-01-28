@@ -52,8 +52,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-@Autonomous(name = "AutoColorSensor", group = "Autonomous OpMode")
-public class AutoColorSensor  extends LinearOpMode {
+@Autonomous(name = "TestColorSensor", group = "Autonomous OpMode")
+public class TestColorSensor extends LinearOpMode {
     ColorSensor colorSensor;    // Hardware Device Object
 
     @Override

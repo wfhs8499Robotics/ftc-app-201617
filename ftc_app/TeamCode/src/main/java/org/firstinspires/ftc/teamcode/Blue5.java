@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
@@ -23,13 +24,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "RedVuforia", group = "Autonomous OpMode")
-@Disabled
+@Autonomous(name = "Blue5", group = "Autonomous OpMode")
+
 //@Override
-public class RedVuforia extends LinearOpMode {
+public class Blue5 extends LinearOpMode {
     /* Declare OpMode members. */
 
-    public static final String TAG = "RedVuforia"; // String for logging
+    public static final String TAG = "Blue5"; // String for logging
     OpenGLMatrix lastLocation = null;
     int i;
     //  Debug program / display messages- yes or no
@@ -50,6 +51,7 @@ public class RedVuforia extends LinearOpMode {
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     COUNTS_PER_MM           = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_MM * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
+    static final double     HALF_SPEED              = 0.3;
     static final double     TURN_SPEED              = 0.5;
 
     DcMotor leftmotor = null; // Hardware Device Object
@@ -60,8 +62,8 @@ public class RedVuforia extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
-    static final double MAX_POS     =  0.40;     // Maximum rotational position
-    static final double MIN_POS     =  0.10;     // Minimum rotational position
+    static final double MAX_POS     =  0.70;     // Maximum rotational position
+    static final double MIN_POS     =  0.05;     // Minimum rotational position
 
     // Define class members
 
@@ -79,16 +81,19 @@ public class RedVuforia extends LinearOpMode {
     boolean bLedOn = false;
 
     public void runOpMode() throws InterruptedException {
+
+// Drive Motors
         leftmotor = hardwareMap.dcMotor.get("left motor");
         leftmotor.setDirection(DcMotor.Direction.REVERSE);
         rightmotor = hardwareMap.dcMotor.get("right motor");
-//        lefttouchSensor = hardwareMap.touchSensor.get("left touch sensor");
-//        righttouchSensor = hardwareMap.touchSensor.get("right touch sensor");
+//Servos to pus buttons
         leftservo = hardwareMap.servo.get("left button pusher");
         rightservo = hardwareMap.servo.get("right button pusher");
+        leftservo.setDirection(Servo.Direction.REVERSE);
+//Retract button Pushers
         leftservo.setPosition(MIN_POS);
         rightservo.setPosition(MIN_POS);
-//        leftservo.setDirection(Servo.Direction.REVERSE);
+
         int counter = 0;
         /**
          * Start up Vuforia, telling it the id of the view that we wish to use as the parent for
@@ -163,9 +168,9 @@ public class RedVuforia extends LinearOpMode {
         // get a reference to our ColorSensor object.
         telemetry.addData("Status", "Done - Resetting Encoders");
         telemetry.update();
-//        colorSensor = hardwareMap.colorSensor.get("color sensor");
+        colorSensor = hardwareMap.colorSensor.get("color sensor");
         // Set the LED in the beginning
-//        colorSensor.enableLed(bLedOn);
+        colorSensor.enableLed(bLedOn);
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0",  "Starting at %7d :%7d",
                 leftmotor.getCurrentPosition(),
@@ -178,20 +183,20 @@ public class RedVuforia extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        // set the motors to encoder mode
-        leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        // full steam ahead
-//        leftmotor.setPower(0.6);
-//        rightmotor.setPower(0.6);
-        // until we find an image in the camera from vuforia
-        while (opModeIsActive() && tools.getRawPose() == null) { //legos = bluecorner, tools = redcorner
-        //slow down the look so we dont go hyper
+        encoderDrive(DRIVE_SPEED,  15.5, 15.5, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED,   24,  24, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S4: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED,   34,  34, 10.0);  // S5: forward 34 Inches with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
+        encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S5: forward 12 Inches with 4 Sec timeout
+
+        // until we find an image in the camera from vuforia even though it should be there
+        while (opModeIsActive() && wheels.getRawPose() == null) { //Wheels are first on the blue side
+            //slow down the look so we dont go hyper
             idle();
         }
-        // found an image now stop.
-        leftmotor.setPower(0);
-        rightmotor.setPower(0);
+
         //Tell the driver we see an image
         if (debugFlag)  {
             telemetry.addData("sees image", null);
@@ -199,19 +204,82 @@ public class RedVuforia extends LinearOpMode {
         }
 
         // mark what side we are on
-        if (tools.getRawPose() != null){
-            bRedSide = true;
+        if (wheels.getRawPose() != null) {
+            bBlueSide = true;
+            goToImagePushButton(wheels);
+        }
+        encoderDrive(DRIVE_SPEED,  -14.75,  -14.75, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(DRIVE_SPEED,   46, 46, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,    10, -10, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
+        encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+
+        // until we find an image in the camera from vuforia even though it should be there
+        while (opModeIsActive() && legos.getRawPose() == null) { //legos are first on the blue side
+            //slow down the look so we dont go hyper
+            idle();
+        }
+
+        //Tell the driver we see an image
+        if (debugFlag)  {
+            telemetry.addData("sees image", null);
+            telemetry.update();
+        }
+
+        // mark what side we are on
+        if (legos.getRawPose() != null) {
+            goToImagePushButton(legos);
+        }
+
+        encoderDrive(DRIVE_SPEED,   -24.75, 24.75, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,    -10, 10, 4.0);  // S2: Turn left 6 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        // until we find an image in the camera from vuforia even though it should be there
+        while (opModeIsActive() && tools.getRawPose() == null) { //tools are second on the blue side
+            //slow down the look so we dont go hyper
+            idle();
+        }
+
+        //Tell the driver we see an image
+        if (debugFlag)  {
+            telemetry.addData("sees image", null);
+            telemetry.update();
+        }
+
+        // mark what side we are on
+        if (tools.getRawPose() != null) {
             goToImagePushButton(tools);
         }
-        encoderDrive(DRIVE_SPEED,  -6,  -6, 5.0);  // S1: Backward 5 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   6, -6, 4.0);  // S2: Turn Right 6 Inches with 4 Sec timeout or 45 degrees
-        encoderDrive(DRIVE_SPEED, -68, -68, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,   -6, 6, 4.0);  // S2: Turn left 6 Inches with 4 Sec timeout or 45 degrees
-        // go to the other image on our side
-        goToImagePushButton(gears);
-        encoderDrive(DRIVE_SPEED,  -60,  -60, 8.0);  // S1: Backward 5 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   -6, 6, 4.0);  // S2: Turn Right 6 Inches with 4 Sec timeout or 45 degrees
-//        encoderDrive(DRIVE_SPEED, -72, -72, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
+
+        encoderDrive(DRIVE_SPEED,  -14.75, -14.75, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(DRIVE_SPEED,   46, 46, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,    10, -10, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
+        encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+
+        // until we find an image in the camera from vuforia even though it should be there
+        while (opModeIsActive() && gears.getRawPose() == null) { //legos are first on the blue side
+            //slow down the look so we dont go hyper
+            idle();
+        }
+
+        //Tell the driver we see an image
+        if (debugFlag)  {
+            telemetry.addData("sees image", null);
+            telemetry.update();
+        }
+
+        // mark what side we are on
+        if (gears.getRawPose() != null) {
+            goToImagePushButton(gears);
+        }
+
+
+        encoderDrive(DRIVE_SPEED,  -26.75, -26.75, 10.0);  // S1: Backward 26.75 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(DRIVE_SPEED,  24, 24, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(DRIVE_SPEED,  46, 46, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
     }
 /*
 * based in the image object that is passed in calculate angles and go to the image.  once you arrive at the image
@@ -226,8 +294,8 @@ public class RedVuforia extends LinearOpMode {
             sleep(2000);
         }
 
-        // figure out how far to go
-        VectorF trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
+        // figure out how many degrees to turn
+        VectorF trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(0, 0, -50));
         // adjust to the right angle to go
         if (debugFlag){
             telemetry.addData("trans = ", trans);
@@ -235,28 +303,25 @@ public class RedVuforia extends LinearOpMode {
             sleep(2000);
         }
         if(trans.get(0) > 0) {
-            leftmotor.setPower(0.05);
-            rightmotor.setPower(-0.05);
+            leftmotor.setPower(0.03);
+            rightmotor.setPower(-0.03);
         } else {
-            leftmotor.setPower(-0.05);
-            rightmotor.setPower(0.05);
+            leftmotor.setPower(-0.03);
+            rightmotor.setPower(0.03);
         }
         // using the current position keep going until it matches where we want to be
         do {
             if (myImage.getPose() != null) {
-                trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(100, 0, 0));
-                if (debugFlag){
-                    telemetry.addData("trans = ", trans);
-                    telemetry.addData("mat.abs trans.get(0)", Math.abs(trans.get(0)));
-                    telemetry.addData("image position translation = ", myImage.getPose().getTranslation());
-                    telemetry.addData("degrees = ", Math.toDegrees(angles.get(0)) - 90);
-                    telemetry.update();
-                    sleep(1000);
-                }
+                trans = navOffWall(myImage.getPose().getTranslation(), Math.toDegrees(angles.get(0)) - 90, new VectorF(0, 0, -50));
+//                if (debugFlag){
+                telemetry.addData("tran 0 = ", Math.abs(trans.get(0)));
+                telemetry.addData("degrees = ", Math.toDegrees(angles.get(0)) - 90);
+                telemetry.update();
+//                }
             }
             idle();
         } while (opModeIsActive() && Math.abs(trans.get(0)) > 30);
-        //Stop!!  We are there
+        //Stop!!  We are at the right angle
         leftmotor.setPower(0);
         rightmotor.setPower(0);
         // tell the driver
@@ -265,61 +330,18 @@ public class RedVuforia extends LinearOpMode {
             telemetry.update();
             sleep(1000);
         }
-        // we are at the right angle now to walk to the position
-        // now go to in front of the image using run to position
-        leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        // set the target position for each motor
-        if (debugFlag){
-            telemetry.addData("current = ", leftmotor.getCurrentPosition());
-            telemetry.addData("tran.get 0 = ", trans.get(0));
-            telemetry.addData("tran.get 2 = ", trans.get(2));
-            telemetry.addData("Hypoten = ", Math.hypot(trans.get(0), trans.get(2)) + 150);
-            telemetry.addData("wheel rotations to get there", (Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186);
-            telemetry.addData("ticks to get there", ((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) * 1440);
-            telemetry.addData("new position = ", ((int) (leftmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) * 1440))));
 
-            telemetry.update();
-            sleep(1000);
-        }
-/*
-//        leftmotor.setTargetPosition((int) (leftmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
-//        rightmotor.setTargetPosition((int) (rightmotor.getCurrentPosition() + ((Math.hypot(trans.get(0), trans.get(2)) + 150) / (319.186 *1440))));
-        //just a little power to get there
-        if (debugFlag){
-            telemetry.addData("new position = ", ((int) (leftmotor.getCurrentPosition() + (((Math.hypot(trans.get(0), trans.get(2)) + 150) / 319.186) *1440))));
-            telemetry.update();
-            sleep(1000);
-        }
-
-        leftmotor.setPower(0.15);
-        rightmotor.setPower(0.15);
-        // while we are moving.. just wait
-        while(opModeIsActive() && leftmotor.isBusy() && rightmotor.isBusy()){
-          idle();
-        }
-        if (debugFlag){
-            telemetry.addData("trans = ", trans);
-            telemetry.update();
-            sleep(1000);
-        }
- */
-        encoderDriveMM(0.4, Math.hypot(trans.get(0), trans.get(2)) + 150, Math.hypot(trans.get(0), trans.get(2)) + 150, 3);
-        // there!  now Stop
-        leftmotor.setPower(0);
-        rightmotor.setPower(0);
-        //  set the motors back to encoder mode.
-        leftmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        encoderDriveMM(0.4, Math.hypot(trans.get(0), trans.get(2)) + 0, Math.hypot(trans.get(0), trans.get(2)) + 0, 3);  //was + 150 for the distance
+        // there!
         // turn to get get robot square with the images
-            while (opModeIsActive() && (myImage.getPose() == null || Math.abs(myImage.getPose().getTranslation().get(0)) > 10)){
-                if (debugFlag) {
-                    telemetry.addData("close abs get 0 = ", Math.abs(myImage.getPose().getTranslation().get(0)));
-                    telemetry.update();
-                    sleep(1000);
-                }
+        while (opModeIsActive() && (myImage.getPose() == null || Math.abs(myImage.getPose().getTranslation().get(0)) > 8)){
+            if (debugFlag) {
+                telemetry.addData("close abs get 0 = ", Math.abs(myImage.getPose().getTranslation().get(0)));
+                telemetry.update();
+                sleep(1000);
+            }
             if(myImage.getPose() != null) {
-                if (myImage.getPose().getTranslation().get(0) > 0) {
+                if (myImage.getPose().getTranslation().get(0) > 8) {
                     leftmotor.setPower(0.03);
                     rightmotor.setPower(-0.03);
                 } else {
@@ -327,49 +349,37 @@ public class RedVuforia extends LinearOpMode {
                     rightmotor.setPower(0.03);
                 }
             } else {
-                    leftmotor.setPower(-0.15);
-                    rightmotor.setPower(0.15);
-                }
+                leftmotor.setPower(0.03);
+                rightmotor.setPower(-0.03);
+            }
+            idle();
         }
         //Stop..  we are right in front of the image
         leftmotor.setPower(0);
         rightmotor.setPower(0);
         //Move forward to be able to push the buttons
-        leftmotor.setPower(0.15);
-        rightmotor.setPower(0.15);
-        // wait to touch the wall
-//        while (opModeIsActive() && (!lefttouchSensor.isPressed() || !righttouchSensor.isPressed())) {
-//             idle();
-//        }
-        encoderDrive(0.15,  6,  6, 5.0);  // S1: Forward 6 Inches with 5 Sec timeout
-        //Touched the wall now stop
-        leftmotor.setPower(0);
-        rightmotor.setPower(0);
+        encoderDrive(0.3,  3,  3, 5.0);  // S1: Forward 8 Inches with 5 Sec timeout
         // Tell the driver
         telemetry.addData("stopping", null);
         telemetry.update();
         // check the color sensor to see what button to press
         // convert the RGB values to HSV values.
-//        Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
+        Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
         // send the info back to driver station using telemetry function.
         telemetry.addData("LED", bLedOn ? "On" : "Off");
-//        telemetry.addData("Clear", colorSensor.alpha());
-//        telemetry.addData("Red  ", colorSensor.red() * 8);
-//        telemetry.addData("Green", colorSensor.green() * 8);
-//        telemetry.addData("Blue ", colorSensor.blue() * 8);
         telemetry.addData("Hue", hsvValues[0]);
         telemetry.addData("Saturation", hsvValues[1]);
         telemetry.addData("Value", hsvValues[2]);
         // TODO based on the side we are on red or blue and the color of the right side of the beacon..
-        if (hsvValues[0] > 100){ // on red side and hue > 100 is blue
-            // push the button on the right
-            leftservo.setPosition(MAX_POS);
+        if (hsvValues[0] > 100){ // on blue side and hue > 100 is blue
+            // push the button on the left
+            rightservo.setPosition(MAX_POS);
             // allow the servo to move
             sleep(CYCLE_MS);
         }
-        if (hsvValues[0] < 100){ // on red side and hue < 100 is Red
-            // push the button on the Left
-            rightservo.setPosition(MIN_POS);
+        if (hsvValues[0] < 100){ // on blue side and hue < 100 is red
+            // push the button on the right
+            leftservo.setPosition(MAX_POS);
             // allow the servo to move
             sleep(CYCLE_MS);
         }
@@ -479,24 +489,23 @@ public VectorF anglesFromTarget(VuforiaTrackableDefaultListener image){
             //  sleep(250);   // optional pause after each move
         }
     }
-
     /*
- *  Method to perform a relative move, based on encoder counts.
- *  Encoders are not reset as the move is based on the current position.
- *  Move will stop if any of three conditions occur:
- *  1) Move gets to the desired position
- *  2) Move runs out of time
- *  3) Driver stops the opmode running.
- *
- *  Note: Reverse movement is obtained by setting a negative distance (not speed)
- *      encoderDrive(DRIVE_SPEED,  480,  480, 5.0);  // S1: Forward 48 MMs with 5 Sec timeout
- *      encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 MMs with 4 Sec timeout
- *      encoderDrive(DRIVE_SPEED, -240, -240, 4.0);  // S3: Reverse 24 MMs with 4 Sec timeout
- *
- */
+*  Method to perform a relative move, based on encoder counts.
+*  Encoders are not reset as the move is based on the current position.
+*  Move will stop if any of three conditions occur:
+*  1) Move gets to the desired position
+*  2) Move runs out of time
+*  3) Driver stops the opmode running.
+*
+*  Note: Reverse movement is obtained by setting a negative distance (not speed)
+*      encoderDrive(DRIVE_SPEED,  480,  480, 5.0);  // S1: Forward 48 MMs with 5 Sec timeout
+*      encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 MMs with 4 Sec timeout
+*      encoderDrive(DRIVE_SPEED, -240, -240, 4.0);  // S3: Reverse 24 MMs with 4 Sec timeout
+*
+*/
     public void encoderDriveMM(double speed,
-                             double leftMMs, double rightMMs,
-                             double timeoutS) throws InterruptedException {
+                               double leftMMs, double rightMMs,
+                               double timeoutS) throws InterruptedException {
         int newLeftTarget;
         int newRightTarget;
 
