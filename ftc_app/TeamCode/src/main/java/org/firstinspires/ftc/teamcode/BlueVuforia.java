@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name = "BlueVuforia", group = "Autonomous OpMode")
+@Disabled
 //@Override
 public class BlueVuforia extends LinearOpMode {
     /* Declare OpMode members. */
@@ -331,7 +333,7 @@ public class BlueVuforia extends LinearOpMode {
         leftmotor.setPower(0);
         rightmotor.setPower(0);
         //Move forward to be able to push the buttons
-        encoderDrive(0.3,  8,  8, 5.0);  // S1: Forward 6 Inches with 5 Sec timeout
+        encoderDrive(0.3,  8,  8, 5.0);  // S1: Forward 8 Inches with 5 Sec timeout
         // Tell the driver
         telemetry.addData("stopping", null);
         telemetry.update();
