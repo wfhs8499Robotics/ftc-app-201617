@@ -54,6 +54,8 @@ public class Red5DelayCapBallOnly extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
     static final double     TURN_SPEED              = 0.5;
+    static final double     HALF_SPEED             = 0.3;
+
     DcMotor leftmotor = null;
     DcMotor rightmotor = null;
 
@@ -91,7 +93,7 @@ public class Red5DelayCapBallOnly extends LinearOpMode {
         waitForStart();
         sleep(22500);     // pause so we dont mess anybody up
 
-        encoderDrive(DRIVE_SPEED,  24,  24, 8);  // S1: Forward 48 Inches with 5 Sec timeout
+        encoderDrive(HALF_SPEED,  24,  24, 8);  // S1: Forward 48 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED, 10, -10, 8);  // S2: turn right with 5 Sec timeout
         encoderDrive(DRIVE_SPEED,  24,  24, 8);  // S1: Forward 48 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED, -10, 10, 8);  // S2: turn left with 5 Sec timeout

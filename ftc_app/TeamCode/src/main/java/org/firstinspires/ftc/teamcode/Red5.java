@@ -169,7 +169,7 @@ public class Red5 extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        encoderDrive(DRIVE_SPEED,  15.5, 15.5, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
+        encoderDrive(HALF_SPEED,  15.5, 15.5, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S2: Turn left 10 Inches or 90 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   24,  24, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
         encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S4: Turn right 10 Inches or 90 degrees with 4 Sec timeout
