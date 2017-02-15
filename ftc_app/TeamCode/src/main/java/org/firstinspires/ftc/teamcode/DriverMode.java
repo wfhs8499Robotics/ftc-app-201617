@@ -15,10 +15,10 @@ public class DriverMode extends OpMode {
 
     DcMotor leftmotor = null;   // Hardware Device Object
     DcMotor rightmotor = null;  // Hardware Device Object
-    DcMotor leftshooter = null;   // Hardware Device Object
-    DcMotor rightshooter = null;  // Hardware Device Object
+    DcMotor liftmotor = null;   // Hardware Device Object
     Servo leftservo = null;         // Hardware Device Object
     Servo rightservo = null;         // Hardware Device Object
+    float LiftPercent = 0.5f;  // Lift Motor:: only use 50 percent power as the default speed at full throttle
 
     float StickPercent = 0.5f;  // only use 50 percent power as the default speed at full throttle
     // settings for the Servo
@@ -28,19 +28,25 @@ public class DriverMode extends OpMode {
     // all the variables we need
     double left;
     double right;
-    boolean leftshooterwheel;
-    boolean rightshooterwheel;
+    double lift;
     float hypermode;
     float seanmode;
+    float hyperliftmode;
+    float seanliftmode;
     float driveadjustment;
+    float liftadjustment;
     float pushbeaconright;
     float pushbeaconleft;
     boolean centerservo;
+    boolean extendbothservo;
     boolean bSeanMode = false;
     boolean bFastMode = false;
     boolean bSeanButtonPushed = false;
     boolean bFastButtonPushed = false;
-    boolean bShooterOn = false;
+    boolean bSeanLiftMode = false;
+    boolean bFastLiftMode = false;
+    boolean bSeanLiftButtonPushed = false;
+    boolean bFastLiftButtonPushed = false;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -54,9 +60,7 @@ public class DriverMode extends OpMode {
         leftmotor.setDirection(DcMotor.Direction.REVERSE);
         rightmotor = hardwareMap.dcMotor.get("right motor");
         // get the motor objects created
-        leftshooter = hardwareMap.dcMotor.get("left");
-        leftshooter.setDirection(DcMotor.Direction.REVERSE);
-        rightshooter = hardwareMap.dcMotor.get("right");
+        liftmotor = hardwareMap.dcMotor.get("lift");
         // Get the servo object created
         leftservo = hardwareMap.servo.get("left button pusher");
         rightservo = hardwareMap.servo.get("right button pusher");
@@ -95,9 +99,9 @@ public class DriverMode extends OpMode {
         seanmode = gamepad1.left_trigger;
         pushbeaconright = gamepad2.right_trigger;
         pushbeaconleft = gamepad2.left_trigger;
-        leftshooterwheel = gamepad2.left_bumper;
-        rightshooterwheel = gamepad2.right_bumper;
+        lift = -gamepad2.left_stick_x;
         centerservo = gamepad2.y;
+        extendbothservo = gamepad2.x;
         // if either trigger has started to be pushed, wait til it goes to 0 to toggle modes
         if (hypermode > 0){
             bFastButtonPushed = true;
@@ -119,6 +123,27 @@ public class DriverMode extends OpMode {
                 bFastMode = false;
             }
         }
+        // Lift Motor Controls:: if either trigger has started to be pushed, wait til it goes to 0 to toggle modes
+        if (hyperliftmode > 0){
+            bFastLiftButtonPushed = true;
+        }
+        if (hyperliftmode == 0 && bFastLiftButtonPushed == true){
+            bFastLiftButtonPushed = false;
+            bFastLiftMode = !bFastLiftMode;
+            if (bFastLiftMode){
+                bSeanLiftMode = false;
+            }
+        }
+        if (seanliftmode > 0){
+            bSeanLiftButtonPushed = true;
+        }
+        if (seanliftmode == 0 && bSeanLiftButtonPushed == true){
+            bSeanLiftButtonPushed = false;
+            bSeanLiftMode = !bSeanLiftMode;
+            if (bSeanLiftMode){
+                bFastLiftMode = false;
+            }
+        }
         // move the servo forward on the right
         if (pushbeaconright > 0){
             rightservo.setPosition(MAX_POS);
@@ -134,6 +159,11 @@ public class DriverMode extends OpMode {
             leftservo.setPosition(MIN_POS);
             rightservo.setPosition(MIN_POS);
         }
+        // Extend both servos
+        if (extendbothservo){
+            leftservo.setPosition(MAX_POS);
+            rightservo.setPosition(MAX_POS);
+        }
         // set drive adjustment to the default stick percent
         driveadjustment = StickPercent;
         // change the drive adjustment for hypermode
@@ -144,28 +174,31 @@ public class DriverMode extends OpMode {
         if (bSeanMode){
             driveadjustment = StickPercent * 0.5f;
         }
+        // Lift Motor::  set drive adjustment to the default stick percent
+        liftadjustment = LiftPercent;
+        // change the drive adjustment for hypermode
+        if (bFastLiftMode){
+            liftadjustment = LiftPercent * 2.0f;
+        }
+        // change the drive adjustment to slow mode
+        if (bSeanLiftMode){
+            liftadjustment = LiftPercent * 0.5f;
+        }
+
         // set the power of the motor to the stick value multiplied by the adjustment
         leftmotor.setPower(left * driveadjustment);
         rightmotor.setPower(right * driveadjustment);
-
-        if (leftshooterwheel || rightshooterwheel) {
-            if (bShooterOn) {
-                leftshooter.setPower(0.0);
-                rightshooter.setPower(0.0);
-                bShooterOn = false;
-            } else {
-                leftshooter.setPower(1.0);
-                rightshooter.setPower(1.0);
-                bShooterOn = true;
-            }
-        }
+        liftmotor.setPower(lift * liftadjustment);
 
         // Tell the driver
         telemetry.addData("Fast Mode", bFastMode);
         telemetry.addData("Sean Mode", bSeanMode);
         telemetry.addData("left",  "%.2f", left * driveadjustment);
         telemetry.addData("right", "%.2f", right * driveadjustment);
-        telemetry.addData("Shooter", bShooterOn);
+        telemetry.addData("Lift Fast Mode", bFastLiftMode);
+        telemetry.addData("Lift Sean Mode", bSeanLiftMode);
+        telemetry.addData("Lift",  "%.2f", lift * liftadjustment);
+
         if (pushbeaconright > 0){
             telemetry.addData("servo", "servo right pushed %.2f", MAX_POS);
         }
@@ -173,6 +206,9 @@ public class DriverMode extends OpMode {
             telemetry.addData("servo", "servo left pushed %.2f", MIN_POS);
         }
         if (centerservo){
+            telemetry.addData("servo", "servo center pushed %.2f", position);
+        }
+        if (extendbothservo){
             telemetry.addData("servo", "servo center pushed %.2f", position);
         }
         updateTelemetry(telemetry);
