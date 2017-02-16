@@ -1,3 +1,5 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -19,7 +21,6 @@ public class DriverMode extends OpMode {
     Servo leftservo = null;         // Hardware Device Object
     Servo rightservo = null;         // Hardware Device Object
     float LiftPercent = 0.5f;  // Lift Motor:: only use 50 percent power as the default speed at full throttle
-
     float StickPercent = 0.5f;  // only use 50 percent power as the default speed at full throttle
     // settings for the Servo
     static final double MAX_POS     =  0.70;     // Maximum rotational position
@@ -106,7 +107,7 @@ public class DriverMode extends OpMode {
         if (hypermode > 0){
             bFastButtonPushed = true;
         }
-        if (hypermode == 0 && bFastButtonPushed == true){
+        if (hypermode == 0 && bFastButtonPushed){
             bFastButtonPushed = false;
             bFastMode = !bFastMode;
             if (bFastMode){
@@ -116,7 +117,7 @@ public class DriverMode extends OpMode {
         if (seanmode > 0){
             bSeanButtonPushed = true;
         }
-        if (seanmode == 0 && bSeanButtonPushed == true){
+        if (seanmode == 0 && bSeanButtonPushed){
             bSeanButtonPushed = false;
             bSeanMode = !bSeanMode;
             if (bSeanMode){
@@ -127,7 +128,7 @@ public class DriverMode extends OpMode {
         if (hyperliftmode > 0){
             bFastLiftButtonPushed = true;
         }
-        if (hyperliftmode == 0 && bFastLiftButtonPushed == true){
+        if (hyperliftmode == 0 && bFastLiftButtonPushed){
             bFastLiftButtonPushed = false;
             bFastLiftMode = !bFastLiftMode;
             if (bFastLiftMode){
@@ -137,7 +138,7 @@ public class DriverMode extends OpMode {
         if (seanliftmode > 0){
             bSeanLiftButtonPushed = true;
         }
-        if (seanliftmode == 0 && bSeanLiftButtonPushed == true){
+        if (seanliftmode == 0 && bSeanLiftButtonPushed){
             bSeanLiftButtonPushed = false;
             bSeanLiftMode = !bSeanLiftMode;
             if (bSeanLiftMode){
