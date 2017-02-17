@@ -100,7 +100,7 @@ public class DriverMode extends OpMode {
         seanmode = gamepad1.left_trigger;
         pushbeaconright = gamepad2.right_trigger;
         pushbeaconleft = gamepad2.left_trigger;
-        lift = -gamepad2.left_stick_x;
+        lift = -gamepad2.left_stick_y;
         centerservo = gamepad2.y;
         extendbothservo = gamepad2.x;
         // if either trigger has started to be pushed, wait til it goes to 0 to toggle modes
