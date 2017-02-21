@@ -4,7 +4,6 @@ import android.graphics.Color;
 
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,10 +23,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "Blue5", group = "Autonomous OpMode")
+@Autonomous(name = "Blue5Fast", group = "Autonomous OpMode")
 
 //@Override
-public class Blue5 extends LinearOpMode {
+public class Blue5Fast extends LinearOpMode {
     /* Declare OpMode members. */
 
     public static final String TAG = "Blue5"; // String for logging
@@ -196,11 +195,8 @@ public class Blue5 extends LinearOpMode {
         // wait for the game to begin
         waitForStart();
         encoderDrive(HALF_SPEED,  15.5, 15.5, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED,   24,  24, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S4: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED,   34,  34, 10.0);  // S5: forward 34 Inches with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S6: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED,   50.91,  50.91, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
         encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S7: forward 12 Inches with 4 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there

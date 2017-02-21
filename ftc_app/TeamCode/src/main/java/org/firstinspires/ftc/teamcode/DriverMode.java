@@ -20,12 +20,18 @@ public class DriverMode extends OpMode {
     DcMotor liftmotor = null;   // Hardware Device Object
     Servo leftservo = null;         // Hardware Device Object
     Servo rightservo = null;         // Hardware Device Object
+    Servo liftrelease = null;         // Hardware Device Object
+
     float LiftPercent = 0.5f;  // Lift Motor:: only use 50 percent power as the default speed at full throttle
     float StickPercent = 0.5f;  // only use 50 percent power as the default speed at full throttle
     // settings for the Servo
     static final double MAX_POS     =  0.70;     // Maximum rotational position
     static final double MIN_POS     =  0.05;     // Minimum rotational position
     double  position = ((MAX_POS - MIN_POS) / 2) + MIN_POS; // Start at halfway position
+    // settings for the lift release servo
+    static final double LIFT_MAX_POS     =  0.70;     // Maximum rotational position
+    static final double LIFT_MIN_POS     =  0.05;     // Minimum rotational position
+
     // all the variables we need
     double left;
     double right;
@@ -36,10 +42,11 @@ public class DriverMode extends OpMode {
     float seanliftmode;
     float driveadjustment;
     float liftadjustment;
-    float pushbeaconright;
-    float pushbeaconleft;
-    boolean centerservo;
-    boolean extendbothservo;
+    boolean pushbeaconright = false;
+    boolean pushbeaconleft = false;
+    boolean centerservo = false;
+    boolean extendbothservo = false;
+    boolean liftreleasepushed = false;
     boolean bSeanMode = false;
     boolean bFastMode = false;
     boolean bSeanButtonPushed = false;
@@ -66,9 +73,14 @@ public class DriverMode extends OpMode {
         leftservo = hardwareMap.servo.get("left button pusher");
         rightservo = hardwareMap.servo.get("right button pusher");
         leftservo.setDirection(Servo.Direction.REVERSE);
-        //position the servo to center
+        //position the servo to the minimum position
         leftservo.setPosition(MIN_POS);
         rightservo.setPosition(MIN_POS);
+        // Get the lift release servo object created
+        liftrelease = hardwareMap.servo.get("left button pusher");
+//        liftrelease.setDirection(Servo.Direction.REVERSE);
+        //position the servo to Minimum position
+        liftrelease.setPosition(LIFT_MIN_POS);
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver - I am ready");    //
         updateTelemetry(telemetry);
@@ -98,11 +110,14 @@ public class DriverMode extends OpMode {
         right = -gamepad1.right_stick_y;
         hypermode = gamepad1.right_trigger;
         seanmode = gamepad1.left_trigger;
-        pushbeaconright = gamepad2.right_trigger;
-        pushbeaconleft = gamepad2.left_trigger;
+        pushbeaconright = gamepad2.dpad_right;
+        pushbeaconleft = gamepad2.dpad_left;
         lift = -gamepad2.left_stick_y;
-        centerservo = gamepad2.y;
-        extendbothservo = gamepad2.x;
+        centerservo = gamepad2.dpad_down;
+        extendbothservo = gamepad2.dpad_up;
+        hyperliftmode = gamepad2.right_trigger;
+        seanliftmode = gamepad2.left_trigger;
+        liftreleasepushed = gamepad2.y;
         // if either trigger has started to be pushed, wait til it goes to 0 to toggle modes
         if (hypermode > 0){
             bFastButtonPushed = true;
@@ -146,12 +161,12 @@ public class DriverMode extends OpMode {
             }
         }
         // move the servo forward on the right
-        if (pushbeaconright > 0){
+        if (pushbeaconright == true){
             rightservo.setPosition(MAX_POS);
             leftservo.setPosition(MIN_POS);
         }
         // move the servo forward on the left
-        if (pushbeaconleft > 0){
+        if (pushbeaconleft == true){
             leftservo.setPosition(MAX_POS);
             rightservo.setPosition(MIN_POS);
         }
@@ -164,6 +179,9 @@ public class DriverMode extends OpMode {
         if (extendbothservo){
             leftservo.setPosition(MAX_POS);
             rightservo.setPosition(MAX_POS);
+        }
+        if (liftreleasepushed) {
+            liftrelease.setPosition(LIFT_MAX_POS);
         }
         // set drive adjustment to the default stick percent
         driveadjustment = StickPercent;
@@ -200,17 +218,17 @@ public class DriverMode extends OpMode {
         telemetry.addData("Lift Sean Mode", bSeanLiftMode);
         telemetry.addData("Lift",  "%.2f", lift * liftadjustment);
 
-        if (pushbeaconright > 0){
+        if (pushbeaconright == true){
             telemetry.addData("servo", "servo right pushed %.2f", MAX_POS);
         }
-        if (pushbeaconleft > 0){
+        if (pushbeaconleft == true){
             telemetry.addData("servo", "servo left pushed %.2f", MIN_POS);
         }
         if (centerservo){
-            telemetry.addData("servo", "servo center pushed %.2f", position);
+            telemetry.addData("servo", "servo center pushed %.2f", MIN_POS);
         }
         if (extendbothservo){
-            telemetry.addData("servo", "servo center pushed %.2f", position);
+            telemetry.addData("servo", "servo extend pushed %.2f", MAX_POS);
         }
         updateTelemetry(telemetry);
     }
