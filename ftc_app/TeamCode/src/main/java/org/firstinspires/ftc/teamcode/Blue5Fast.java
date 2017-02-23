@@ -197,6 +197,7 @@ public class Blue5Fast extends LinearOpMode {
         encoderDrive(HALF_SPEED,  15.5, 15.5, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   50.91,  50.91, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
         encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S7: forward 12 Inches with 4 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there

@@ -29,7 +29,7 @@ public class DriverMode extends OpMode {
     static final double MIN_POS     =  0.05;     // Minimum rotational position
     double  position = ((MAX_POS - MIN_POS) / 2) + MIN_POS; // Start at halfway position
     // settings for the lift release servo
-    static final double LIFT_MAX_POS     =  0.70;     // Maximum rotational position
+    static final double LIFT_MAX_POS     =  0.50;     // Maximum rotational position
     static final double LIFT_MIN_POS     =  0.05;     // Minimum rotational position
 
     // all the variables we need
@@ -77,7 +77,7 @@ public class DriverMode extends OpMode {
         leftservo.setPosition(MIN_POS);
         rightservo.setPosition(MIN_POS);
         // Get the lift release servo object created
-        liftrelease = hardwareMap.servo.get("left button pusher");
+        liftrelease = hardwareMap.servo.get("lift release");
 //        liftrelease.setDirection(Servo.Direction.REVERSE);
         //position the servo to Minimum position
         liftrelease.setPosition(LIFT_MIN_POS);
