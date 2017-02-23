@@ -24,8 +24,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "Blue5", group = "Autonomous OpMode")
-
+@Autonomous(name = "Blue5Slow", group = "Autonomous OpMode")
+@Disabled
 //@Override
 public class Blue5 extends LinearOpMode {
     /* Declare OpMode members. */

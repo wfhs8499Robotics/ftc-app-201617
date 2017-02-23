@@ -23,13 +23,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "Blue5", group = "Autonomous OpMode")
+@Autonomous(name = "Blue9GetRed", group = "Autonomous OpMode")
 
 //@Override
-public class Blue5Fast extends LinearOpMode {
+public class Blue9GetRed extends LinearOpMode {
     /* Declare OpMode members. */
 
-    public static final String TAG = "Blue5"; // String for logging
+    public static final String TAG = "Blue9GetRed"; // String for logging
     OpenGLMatrix lastLocation = null;
     int i;
     //  Debug program / display messages- yes or no
@@ -47,8 +47,8 @@ public class Blue5Fast extends LinearOpMode {
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     WHEEL_DIAMETER_MM       = 101.6 ;   // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.14159);
-    static final double     COUNTS_PER_MM           = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_MM * 3.14159);
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     COUNTS_PER_MM           = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_MM * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
     static final double     HALF_SPEED              = 0.3;
     static final double     TURN_SPEED              = 0.5;
@@ -57,6 +57,7 @@ public class Blue5Fast extends LinearOpMode {
     static final double     completeCircle          = 13.0 * 3.14159;
     static final double     turn90degrees           = completeCircle / 4;
     static final double     turn45degrees           = completeCircle / 8;
+
 
     DcMotor leftmotor = null; // Hardware Device Object
     DcMotor rightmotor = null; // Hardware Device Object
@@ -103,6 +104,7 @@ public class Blue5Fast extends LinearOpMode {
 // set it to hold the lift up
         liftrelease.setPosition(LIFT_MIN_POS);
 // generic counter
+
         int counter = 0;
         /**
          * Start up Vuforia, telling it the id of the view that we wish to use as the parent for
@@ -113,19 +115,6 @@ public class Blue5Fast extends LinearOpMode {
          *
          * Note that in addition to indicating which camera is in use, we also need to tell the system
          * the location of the phone on the robot; see phoneLocationOnRobot below.
-         *
-         * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
-         * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
-         * Vuforia will not load without a valid license being provided. Vuforia 'Development' license
-         * keys, which is what is needed here, can be obtained free of charge from the Vuforia developer
-         * web site at https://developer.vuforia.com/license-manager.
-         *
-         * Valid Vuforia license keys are always 380 characters long, and look as if they contain mostly
-         * random data. As an example, here is a example of a fragment of a valid key:
-         *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
-         * Once you've obtained a license key, copy the string form of the key from the Vuforia web site
-         * and paste it in to your code as the value of the 'vuforiaLicenseKey' field of the
-         * {@link Parameters} instance with which you initialize Vuforia.
          */
 
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
@@ -192,14 +181,15 @@ public class Blue5Fast extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        encoderDrive(HALF_SPEED,  15.5, 15.5, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED,   50.91,  50.91, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
-        encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S7: forward 12 Inches with 4 Sec timeout
+        sleep(10000);  // sleep for 10 seconds to not foul
+        encoderDrive(DRIVE_SPEED,  99, 99, 15.0);  // S1: forward 15.5 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 90 degrees with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED,   24,  24, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S4: Turn right 90 degrees with 4 Sec timeout
+        encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S5: forward 12 Inches with 4 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there
-        while (opModeIsActive() && wheels.getRawPose() == null) { //Wheels are first on the blue side
+        while (opModeIsActive() && gears.getRawPose() == null) { //Wheels are first on the blue side
             //slow down the look so we dont go hyper
             idle();
         }
@@ -211,38 +201,18 @@ public class Blue5Fast extends LinearOpMode {
         }
 
         // mark what side we are on
-        if (wheels.getRawPose() != null) {
-            bBlueSide = true;
-            goToImagePushButton(wheels);
+        if (gears.getRawPose() != null) {
+            bRedSide = true;
+            goToImagePushButton(gears);
         }
-        encoderDrive(DRIVE_SPEED,  -15,  -15, 5.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(DRIVE_SPEED,  -15,  -15, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
         encoderDrive(DRIVE_SPEED,   48, 48, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,    turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
-        encoderDrive(HALF_SPEED,    3, 3, 5.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,    -turn90degrees, turn90degrees, 4.0);  // S2: Turn left 10 Inches with 4 Sec timeout or 45 degrees
+        encoderDrive(HALF_SPEED,    3, 3, 5.0);  // S1: forward 3 Inches with 5 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there
-        while (opModeIsActive() && legos.getRawPose() == null) { //legos are first on the blue side
-            //slow down the look so we dont go hyper
-            idle();
-        }
-
-        //Tell the driver we see an image
-        if (debugFlag)  {
-            telemetry.addData("sees image", null);
-            telemetry.update();
-        }
-
-        // mark what side we are on
-        if (legos.getRawPose() != null) {
-            goToImagePushButton(legos);
-        }
-
-        encoderDrive(DRIVE_SPEED,   -27, 27, 10.0);  // S3: Reverse 27 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,    -turn90degrees, turn90degrees, 4.0);  // S2: Turn left 90 degrees
-        encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
-        // until we find an image in the camera from vuforia even though it should be there
-        while (opModeIsActive() && tools.getRawPose() == null) { //tools are second on the blue side
+        while (opModeIsActive() && tools.getRawPose() == null) { //legos are first on the blue side
             //slow down the look so we dont go hyper
             idle();
         }
@@ -258,35 +228,6 @@ public class Blue5Fast extends LinearOpMode {
             goToImagePushButton(tools);
         }
 
-        encoderDrive(DRIVE_SPEED,  -15, -15, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
-        encoderDrive(DRIVE_SPEED,   48, 48, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,    turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
-        encoderDrive(HALF_SPEED,    3, 3, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
-
-        // until we find an image in the camera from vuforia even though it should be there
-        while (opModeIsActive() && gears.getRawPose() == null) { //legos are first on the blue side
-            //slow down the look so we dont go hyper
-            idle();
-        }
-
-        //Tell the driver we see an image
-        if (debugFlag)  {
-            telemetry.addData("sees image", null);
-            telemetry.update();
-        }
-
-        // mark what side we are on
-        if (gears.getRawPose() != null) {
-            goToImagePushButton(gears);
-        }
-
-
-        encoderDrive(DRIVE_SPEED,  -27, -27, 10.0);  // S1: Backward 26.75 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
-        encoderDrive(DRIVE_SPEED,  24, 24, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
-        encoderDrive(DRIVE_SPEED,  46, 46, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
     }
 /*
 * based in the image object that is passed in calculate angles and go to the image.  once you arrive at the image
@@ -337,7 +278,7 @@ public class Blue5Fast extends LinearOpMode {
             telemetry.update();
             sleep(1000);
         }
-
+// go there using encoders
         encoderDriveMM(0.4, Math.hypot(trans.get(0), trans.get(2)) + 0, Math.hypot(trans.get(0), trans.get(2)) + 0, 3);  //was + 150 for the distance
         // there!
         // turn to get get robot square with the images
@@ -379,13 +320,13 @@ public class Blue5Fast extends LinearOpMode {
         telemetry.addData("Value", hsvValues[2]);
         // TODO based on the side we are on red or blue and the color of the right side of the beacon..
         if (hsvValues[0] > 100){ // on blue side and hue > 100 is blue
-            // push the button on the left
+            // push the button on the right
             rightservo.setPosition(MAX_POS);
             // allow the servo to move
             sleep(CYCLE_MS);
         }
         if (hsvValues[0] < 100){ // on blue side and hue < 100 is red
-            // push the button on the right
+            // push the button on the left
             leftservo.setPosition(MAX_POS);
             // allow the servo to move
             sleep(CYCLE_MS);
