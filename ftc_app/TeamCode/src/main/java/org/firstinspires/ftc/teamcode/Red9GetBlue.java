@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name = "Red9GetBlue", group = "Autonomous OpMode")
-@Disabled
+
 //@Override
 public class Red9GetBlue extends LinearOpMode {
     /* Declare OpMode members. */
@@ -195,8 +195,8 @@ public class Red9GetBlue extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        sleep(10000);  //  Sleep 10 seconds to be sure and not foul
-        encoderDrive(DRIVE_SPEED,  99, 99, 15.0);  // S1: forward 99 Inches with 15 Sec timeout
+        sleep(9500);  //  Sleep 10 seconds to be sure and not foul
+        encoderDrive(.95,  99, 99, 15.0);  // S1: forward 99 Inches with 15 Sec timeout
         encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S2: Turn left 90 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   24,  24, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
         encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S4: Turn Right 10 Inches or 90 degrees with 4 Sec timeout

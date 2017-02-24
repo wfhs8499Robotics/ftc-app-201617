@@ -192,15 +192,18 @@ public class Blue5Fast extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        encoderDrive(HALF_SPEED,  15.5, 15.5, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
+        encoderDrive(HALF_SPEED,  15, 15, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   50.91,  50.91, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
         encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
-        encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S7: forward 12 Inches with 4 Sec timeout
+//        encoderDrive(HALF_SPEED,   3, 3, 10.0);  // S7: forward 12 Inches with 4 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there
         while (opModeIsActive() && wheels.getRawPose() == null) { //Wheels are first on the blue side
-            //slow down the look so we dont go hyper
+            if (debugFlag)  {
+                telemetry.addData("NO image", null);
+                telemetry.update();
+            }              //slow down the look so we dont go hyper
             idle();
         }
 
@@ -223,7 +226,11 @@ public class Blue5Fast extends LinearOpMode {
 
         // until we find an image in the camera from vuforia even though it should be there
         while (opModeIsActive() && legos.getRawPose() == null) { //legos are first on the blue side
-            //slow down the look so we dont go hyper
+            //Tell the driver we see an image
+            if (debugFlag)  {
+                telemetry.addData("NO image", null);
+                telemetry.update();
+            }            //slow down the look so we dont go hyper
             idle();
         }
 
@@ -238,7 +245,7 @@ public class Blue5Fast extends LinearOpMode {
             goToImagePushButton(legos);
         }
 
-        encoderDrive(DRIVE_SPEED,   -27, 27, 10.0);  // S3: Reverse 27 Inches with 10 Sec timeout
+        encoderDrive(DRIVE_SPEED,   -27, -27, 10.0);  // S3: Reverse 27 Inches with 10 Sec timeout
         encoderDrive(TURN_SPEED,    -turn90degrees, turn90degrees, 4.0);  // S2: Turn left 90 degrees
         encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
         // until we find an image in the camera from vuforia even though it should be there

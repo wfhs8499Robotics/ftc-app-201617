@@ -61,7 +61,7 @@ public class Blue7 extends LinearOpMode {
     ColorSensor colorSensor = null;    // Hardware Device Object
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   50;     // period of each cycle
+    static final int    CYCLE_MS    =   250;     // period of each cycle
     static final double MAX_POS     =  0.70;     // Maximum rotational position
     static final double MIN_POS     =  0.05;     // Minimum rotational position
 
@@ -183,7 +183,7 @@ public class Blue7 extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        encoderDrive(HALF_SPEED,  15.5, 15.5, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
+        encoderDrive(HALF_SPEED,  15, 15, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   48,  48, 10.0);  // S3: forward 48 Inches with 4 Sec timeout
         encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S4: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
@@ -208,7 +208,7 @@ public class Blue7 extends LinearOpMode {
             bBlueSide = true;
             goToImagePushButton(wheels);
         }
-        encoderDrive(DRIVE_SPEED,  -14.75,  -14.75, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  -15,  -15, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
         encoderDrive(DRIVE_SPEED,   46, 46, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
         encoderDrive(TURN_SPEED,    10, -10, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
@@ -231,7 +231,7 @@ public class Blue7 extends LinearOpMode {
             goToImagePushButton(legos);
         }
 
-        encoderDrive(DRIVE_SPEED,   -24.75, 24.75, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
+        encoderDrive(DRIVE_SPEED,   -25, -25, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
         encoderDrive(TURN_SPEED,    -10, 10, 4.0);  // S2: Turn left 6 Inches with 4 Sec timeout or 90 degrees
         encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
         // until we find an image in the camera from vuforia even though it should be there
