@@ -192,7 +192,7 @@ public class Blue5Fast extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        encoderDrive(HALF_SPEED,  15, 15, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  15, 15, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   50.91,  50.91, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
         encoderDrive(TURN_SPEED,   turn45degrees, -turn45degrees, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
@@ -218,7 +218,7 @@ public class Blue5Fast extends LinearOpMode {
             bBlueSide = true;
             goToImagePushButton(wheels);
         }
-        encoderDrive(DRIVE_SPEED,  -15,  -15, 5.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  -15, -15, 5.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
         encoderDrive(DRIVE_SPEED,   48, 48, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
         encoderDrive(TURN_SPEED,    turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
@@ -384,6 +384,7 @@ public class Blue5Fast extends LinearOpMode {
         telemetry.addData("Hue", hsvValues[0]);
         telemetry.addData("Saturation", hsvValues[1]);
         telemetry.addData("Value", hsvValues[2]);
+        telemetry.update();
         // TODO based on the side we are on red or blue and the color of the right side of the beacon..
         if (hsvValues[0] > 100){ // on blue side and hue > 100 is blue
             // push the button on the left

@@ -181,8 +181,8 @@ public class Blue9GetRed extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        sleep(10000);  // sleep for 10 seconds to not foul
-        encoderDrive(DRIVE_SPEED,  99, 99, 15.0);  // S1: forward 15.5 Inches with 5 Sec timeout
+        sleep(9500);  // sleep for 10 seconds to not foul
+        encoderDrive(.99,  99, 99, 15.0);  // S1: forward 99 Inches with 15 Sec timeout
         encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 90 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   24,  24, 10.0);  // S3: forward 24 Inches with 4 Sec timeout
         encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S4: Turn right 90 degrees with 4 Sec timeout
@@ -318,6 +318,7 @@ public class Blue9GetRed extends LinearOpMode {
         telemetry.addData("Hue", hsvValues[0]);
         telemetry.addData("Saturation", hsvValues[1]);
         telemetry.addData("Value", hsvValues[2]);
+        telemetry.update();
         // TODO based on the side we are on red or blue and the color of the right side of the beacon..
         if (hsvValues[0] > 100){ // on blue side and hue > 100 is blue
             // push the button on the right

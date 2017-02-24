@@ -53,11 +53,14 @@ public class Blue7 extends LinearOpMode {
     static final double     DRIVE_SPEED             = 0.6;
     static final double     HALF_SPEED              = 0.3;
     static final double     TURN_SPEED              = 0.5;
+    // Robot configuration and turning distances
+    static final double     wheelWidth              = 13.0;
+    static final double     completeCircle          = 13.0 * 3.14159;
+    static final double     turn90degrees           = completeCircle / 4;
+    static final double     turn45degrees           = completeCircle / 8;
 
     DcMotor leftmotor = null; // Hardware Device Object
     DcMotor rightmotor = null; // Hardware Device Object
-//    TouchSensor lefttouchSensor = null;  // Hardware Device Object
-//    TouchSensor righttouchSensor = null;  // Hardware Device Object
     ColorSensor colorSensor = null;    // Hardware Device Object
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
@@ -183,12 +186,12 @@ public class Blue7 extends LinearOpMode {
         telemetry.update();
         // wait for the game to begin
         waitForStart();
-        encoderDrive(HALF_SPEED,  15, 15, 10.0);  // S1: forward 15.5 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED,  15, 15, 10.0);  // S1: forward 15 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn Right 90 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   48,  48, 10.0);  // S3: forward 48 Inches with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S4: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED,   34,  34, 10.0);  // S5: forward 34 Inches with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn Right 10 Inches or 90 degrees with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S4: Turn Right 90 degrees with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED,   36,  36, 10.0);  // S5: forward 34 Inches with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn Right 90 degrees with 4 Sec timeout
         encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S5: forward 12 Inches with 4 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there
@@ -208,11 +211,11 @@ public class Blue7 extends LinearOpMode {
             bBlueSide = true;
             goToImagePushButton(wheels);
         }
-        encoderDrive(DRIVE_SPEED,  -15,  -15, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
-        encoderDrive(DRIVE_SPEED,   46, 46, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,    10, -10, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
-        encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  -15, -15, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(DRIVE_SPEED,   48, 48, 10.0);  // S3: Forward 48 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,    turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
+        encoderDrive(HALF_SPEED,    3, 3, 10.0);  // S1: forward 3 Inches with 5 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there
         while (opModeIsActive() && legos.getRawPose() == null) { //legos are first on the blue side
@@ -232,7 +235,7 @@ public class Blue7 extends LinearOpMode {
         }
 
         encoderDrive(DRIVE_SPEED,   -25, -25, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,    -10, 10, 4.0);  // S2: Turn left 6 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(TURN_SPEED,    -turn90degrees, turn90degrees, 4.0);  // S2: Turn left 6 Inches with 4 Sec timeout or 90 degrees
         encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
         // until we find an image in the camera from vuforia even though it should be there
         while (opModeIsActive() && tools.getRawPose() == null) { //tools are second on the blue side
@@ -251,11 +254,11 @@ public class Blue7 extends LinearOpMode {
             goToImagePushButton(tools);
         }
 
-        encoderDrive(DRIVE_SPEED,  -14.75, -14.75, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   -10, 10, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
-        encoderDrive(DRIVE_SPEED,   46, 46, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,    10, -10, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
-        encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  -15, -15, 10.0);  // S1: Backward 15 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S2: Turn Left 6 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(DRIVE_SPEED,   48, 48, 10.0);  // S3: Forward 48 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,    turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 45 degrees
+        encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Forward 12 Inches with 5 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there
         while (opModeIsActive() && gears.getRawPose() == null) { //legos are first on the blue side
@@ -275,10 +278,10 @@ public class Blue7 extends LinearOpMode {
         }
 
 
-        encoderDrive(DRIVE_SPEED,  -26.75, -26.75, 10.0);  // S1: Backward 26.75 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(DRIVE_SPEED,  -27, -27, 10.0);  // S1: Backward 26.75 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
         encoderDrive(DRIVE_SPEED,  24, 24, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,   10, -10, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(TURN_SPEED,   turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
         encoderDrive(DRIVE_SPEED,  46, 46, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
     }
 /*
@@ -370,6 +373,7 @@ public class Blue7 extends LinearOpMode {
         telemetry.addData("Hue", hsvValues[0]);
         telemetry.addData("Saturation", hsvValues[1]);
         telemetry.addData("Value", hsvValues[2]);
+        telemetry.update();
         // TODO based on the side we are on red or blue and the color of the right side of the beacon..
         if (hsvValues[0] > 100){ // on blue side and hue > 100 is blue
             // push the button on the left
