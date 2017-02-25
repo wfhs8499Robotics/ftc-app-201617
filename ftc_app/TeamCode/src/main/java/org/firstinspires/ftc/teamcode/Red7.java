@@ -67,7 +67,7 @@ public class Red7 extends LinearOpMode {
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
     static final double MAX_POS     =  0.70;     // Maximum rotational position
-    static final double MIN_POS     =  0.05;     // Minimum rotational position
+    static final double MIN_POS     =  0.0;     // Minimum rotational position
 
     // Define class members
 
@@ -235,10 +235,10 @@ public class Red7 extends LinearOpMode {
             goToImagePushButton(tools);
         }
 
-        encoderDrive(DRIVE_SPEED,   -25, -25, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
-        encoderDrive(TURN_SPEED,    turn90degrees, -turn90degrees, 4.0);  // S2: Turn right 6 Inches with 4 Sec timeout or 90 degrees
-        encoderDrive(HALF_SPEED,    12, 12, 10.0);  // S1: Backward 14.75 Inches with 5 Sec timeout
-        // until we find an image in the camera from vuforia even though it should be there
+        encoderDrive(DRIVE_SPEED,   -15, -15, 10.0);  // S3: Reverse 24.75 Inches with 10 Sec timeout
+        encoderDrive(TURN_SPEED,    turn45degrees, -turn45degrees, 4.0);  // S2: Turn right 10 Inches with 4 Sec timeout or 90 degrees
+        encoderDrive(HALF_SPEED,    -50, -50, 10.0);  // S1: Backward 12 Inches with 5 Sec timeout
+/*        // until we find an image in the camera from vuforia even though it should be there
         while (opModeIsActive() && legos.getRawPose() == null) { //tools are second on the blue side
             //slow down the look so we dont go hyper
             idle();
@@ -284,7 +284,7 @@ public class Red7 extends LinearOpMode {
         encoderDrive(DRIVE_SPEED,  24, 24, 10.0);  // S3: Reverse 68 Inches with 10 Sec timeout
         encoderDrive(TURN_SPEED,   -turn90degrees, turn90degrees, 4.0);  // S2: Turn left 10 Inches with 4 Sec timeout or 90 degrees
         encoderDrive(DRIVE_SPEED,  46, 46, 10.0);  // S3: Reverse 46 Inches with 10 Sec timeout
-    }
+*/    }
 /*
 * based in the image object that is passed in calculate angles and go to the image.  once you arrive at the image
 * determine the color of the right beacon and press the appropriate button.

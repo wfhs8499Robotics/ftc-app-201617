@@ -4,6 +4,7 @@ import android.graphics.Color;
 
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name = "Blue9GetRed", group = "Autonomous OpMode")
-
+@Disabled
 //@Override
 public class Blue9GetRed extends LinearOpMode {
     /* Declare OpMode members. */

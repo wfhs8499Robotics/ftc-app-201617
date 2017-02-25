@@ -26,7 +26,7 @@ public class DriverMode extends OpMode {
     float StickPercent = 0.5f;  // only use 50 percent power as the default speed at full throttle
     // settings for the Servo
     static final double MAX_POS     =  0.70;     // Maximum rotational position
-    static final double MIN_POS     =  0.05;     // Minimum rotational position
+    static final double MIN_POS     =  0.0;     // Minimum rotational position
     double  position = ((MAX_POS - MIN_POS) / 2) + MIN_POS; // Start at halfway position
     // settings for the lift release servo
     static final double LIFT_MAX_POS     =  0.50;     // Maximum rotational position

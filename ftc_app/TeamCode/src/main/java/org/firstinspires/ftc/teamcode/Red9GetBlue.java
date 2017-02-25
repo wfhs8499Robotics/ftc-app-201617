@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name = "Red9GetBlue", group = "Autonomous OpMode")
-
+@Disabled
 //@Override
 public class Red9GetBlue extends LinearOpMode {
     /* Declare OpMode members. */
