@@ -362,13 +362,13 @@ public class Red5 extends LinearOpMode {
         telemetry.addData("Value", hsvValues[2]);
         telemetry.update();
         // TODO based on the side we are on red or blue and the color of the right side of the beacon..
-        if (hsvValues[0] < 100 || hsvValues[0] > 300){ // on red side and hue < 100 is red
+        if (hsvValues[0] < 100 || hsvValues[0] > 300){ // on blue side and hue < 100 is red
             // push the button on the right
             rightservo.setPosition(MAX_POS);
             // allow the servo to move
             sleep(CYCLE_MS);
         }
-        if (hsvValues[0] > 100){ // on red side and hue > 100 is blue
+        if (hsvValues[0] > 100  && hsvValues[0] < 300){ // on blue side and hue > 100 is blue
             // push the button on the left
             leftservo.setPosition(MAX_POS);
             // allow the servo to move
