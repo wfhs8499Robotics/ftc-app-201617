@@ -65,7 +65,7 @@ public class Red5 extends LinearOpMode {
     ColorSensor colorSensor = null;    // Hardware Device Object
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   50;     // period of each cycle
+    static final int    CYCLE_MS    =   500;     // period of each cycle
     static final double MAX_POS     =  0.70;     // Maximum rotational position
     static final double MIN_POS     =  0.0;     // Minimum rotational position
 
@@ -178,7 +178,7 @@ public class Red5 extends LinearOpMode {
         encoderDrive(TURN_SPEED,   -turn45degrees, turn45degrees, 4.0);  // S2: Turn left 45 degrees with 4 Sec timeout
         encoderDrive(DRIVE_SPEED,   50.91, 50.91, 10.0);  // S5: forward 34 Inches with 4 Sec timeout
         encoderDrive(TURN_SPEED,   -turn45degrees, turn45degrees, 4.0);  // S2: Turn left 10 Inches or 90 degrees with 4 Sec timeout
-        encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S5: forward 12 Inches with 4 Sec timeout
+//        encoderDrive(HALF_SPEED,   12,  12, 10.0);  // S5: forward 12 Inches with 4 Sec timeout
 
         // until we find an image in the camera from vuforia even though it should be there
         while (opModeIsActive() && gears.getRawPose() == null) { //Wheels are first on the blue side
@@ -353,6 +353,7 @@ public class Red5 extends LinearOpMode {
         telemetry.update();
         // check the color sensor to see what button to press
         // convert the RGB values to HSV values.
+        sleep(50);
         Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
         // send the info back to driver station using telemetry function.
         telemetry.addData("LED", bLedOn ? "On" : "Off");
@@ -361,15 +362,15 @@ public class Red5 extends LinearOpMode {
         telemetry.addData("Value", hsvValues[2]);
         telemetry.update();
         // TODO based on the side we are on red or blue and the color of the right side of the beacon..
-        if (hsvValues[0] > 100){ // on red side and hue > 100 is blue
-            // push the button on the left
-            leftservo.setPosition(MAX_POS);
+        if (hsvValues[0] < 100 || hsvValues[0] > 300){ // on red side and hue < 100 is red
+            // push the button on the right
+            rightservo.setPosition(MAX_POS);
             // allow the servo to move
             sleep(CYCLE_MS);
         }
-        if (hsvValues[0] < 100){ // on red side and hue < 100 is red
-            // push the button on the right
-            rightservo.setPosition(MAX_POS);
+        if (hsvValues[0] > 100){ // on red side and hue > 100 is blue
+            // push the button on the left
+            leftservo.setPosition(MAX_POS);
             // allow the servo to move
             sleep(CYCLE_MS);
         }
