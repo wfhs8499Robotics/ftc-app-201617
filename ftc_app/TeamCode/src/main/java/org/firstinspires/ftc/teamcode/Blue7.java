@@ -375,7 +375,6 @@ public class Blue7 extends LinearOpMode {
         telemetry.addData("Saturation", hsvValues[1]);
         telemetry.addData("Value", hsvValues[2]);
         telemetry.update();
-        // TODO based on the side we are on red or blue and the color of the right side of the beacon..
         if (hsvValues[0] < 100 || hsvValues[0] > 300){ // on blue side and hue < 100 is red
             // push the button on the right
             leftservo.setPosition(MAX_POS);
